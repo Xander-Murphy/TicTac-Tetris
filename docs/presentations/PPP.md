@@ -108,5 +108,5 @@ Requirements: 12
 ---
 # Project Documentation
 
-- [Project Plan Presentation (PPP)]()
+- [Project Plan Presentation (PPP)](https://github.com/Xander-Murphy/TicTac-Tetris/blob/main/docs/presentations/PPP.pdf)
 - [GitHub Repository](https://github.com/Xander-Murphy/TicTac-Tetris)
