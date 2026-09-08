@@ -5,55 +5,80 @@ html: true
 ---
 # TicTac Tetris – Team Project
 
-**ASE 42**  
+**ASE 420**  
 Xander Murphy, Joseph Gallucci, Tanner Andrews
 
 ---
 # Project Description
 
-TicTac Tetris is our team project to further develop our software design and team building skills to better ourselves for our future careers
+TicTac Tetris is our team project to further develop our software design and team building skills to better ourselves for our future careers.
 
 ---
 # Problem Domain
 
-As it stands our current Tetris game is very bare bones and unpolished, the goal of this project is to improve on our current base game using
- our software design principles and add new and unique features with our software engineering skills
+As it stands our current Tetris game is very bare bones and unpolished, the goal of this project is to improve on our current base game using our software design principles and add new and unique features with our software engineering skills.
 
 ---
 # Core Features Overview
 
-- 
-- 
+- UI Overhaul
+- Challenges
+- Mission Mode
+- Quality of Life Updates
 
 ---
-# Feature 1: ___
-
-**Owner: Joseph Gallucci**
-## Description
-___
-
-## Requirements
-- ___
-- ___
-- ___
-
----
-# Feature 2: ___
+# Feature 1: UI Overhaul
 
 **Owner: Tanner Andrews**
 ## Description
-___
+Polish the game's UI and make it feel more user friendly
 
 ## Requirements
-- ___
-- ___
-- ___
+- Navigation layout
+- Style design (colors, art, other visuals)
+- Clear & Visible gameplay
+
+---
+# Feature 2: Challenges
+
+**Owner: Tanner Andrews**
+## Description
+Tetris gameplay with unique effects that change how it is played
+
+## Requirements
+- Menu screen to select which challenges will be active
+- Unique challenges such as new blocks, screen size, or gravity
+- Score multipliers for each unique challenge selected
+
+---
+# Feature 3: Mission Mode
+
+**Owner: Joseph Gallucci**
+## Description
+Users will have to clear the board of a pre-determined obstable to complete their "mission"
+
+## Requirements
+- Mission selection screen
+- Unique missions for players to complete
+- Mission replayabality
+
+---
+# Feature 4: Quality of Life Updates
+
+**Owner: Joseph Gallucci**
+## Description
+Modern iterations of Tetris have niche features to make the game more enjoyable
+
+## Requirements
+- Quick dropping of blocks
+- "Wall kicks" for base game elements
+- High scores saved locally
 
 ---
 # Total Features and Requirements
 
-Features: x
-Requirements: x
+Features: 4
+Requirements: 12
   
 ---
 # Team Rules
@@ -61,17 +86,6 @@ Requirements: x
 1. Communicate effectively and consistantly.
 2. All weekly updates must be finished by Saturday of the current week.
 3. Communication will be handled over discord weekly for quick messages and questions.
-
----
-# Architecture
-
-This application follows a client-server architecture.
-
-  - The frontend is built using React and handles user interaction and UI rendering.
-  - The backend is built using NodeJS and Express to manage API requests.
-  - WebSockets are used to support real-time chat communication.
-  - The backend communicates with OpenAI's API to generate chat responses
-  - Conversation data persists in local and session storages.
 
 ---
 # Schedule & Milestones
