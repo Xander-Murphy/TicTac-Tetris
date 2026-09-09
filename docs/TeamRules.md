@@ -17,4 +17,4 @@ html: true
 # Consequences for Rule Violation
 
 1. Deductions on peer evaluation assignments.
-2. Reapeated or consistent rule breaking may result in a report to Dr. Cho.
+2. Repeated or consistent rule breaking may result in a report to Dr. Cho.
