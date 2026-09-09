@@ -81,6 +81,21 @@ Features: 4
 Requirements: 12
   
 ---
+# Architecture 
+The architecture serves to separate the game into clear components so the code is easier to maintain and expand.
+- Reduce global variables
+- Give each component a clear responsibility
+- Create a foundation for future features
+
+---
+# Design
+Refactor the existing procedural code into an organized object-oriented structure.
+- Encapsulation
+- Single Responsibility
+- Maintainability
+- Extensibility
+
+---
 # Team Rules
 
 1. Communicate effectively and consistantly.
