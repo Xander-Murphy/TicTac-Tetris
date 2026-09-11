@@ -2,6 +2,7 @@
 
 TicTac Tetris is a team project focused on improving and expanding a bare-bones Tetris game using better software design and new gameplay features.
 
+**Course:** [ASE 420 - Canvas](https://nku.instructure.com/courses/91834/pages/tictac-tetris-team-project)
 ## Team
 
 * **Xander Murphy** — Architecture, Design & Refactoring
