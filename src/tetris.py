@@ -36,8 +36,30 @@ Type = 0
 Color = 0
 Rotation = 0
 
-State = "start" # or "gameover"
+State = "gameover" # or "start", or "mission"
 Field = []
+MissionField = [
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,5,0,0,0,0,0,0,0,0],
+    [0,5,0,0,0,0,0,0,0,0],
+    [5,5,3,0,0,0,6,6,6,0],
+    [1,1,3,3,7,0,6,5,5,5],
+    [1,1,0,3,7,1,1,0,2,5],
+    [6,6,6,6,7,1,1,0,2,2],
+    [6,6,4,4,7,0,4,4,2,7],
+    [6,6,2,4,4,0,5,4,4,7],
+    [1,1,2,2,3,3,5,0,0,7],
+    [1,1,2,3,3,5,5,0,0,7],
+]
 
 # Tetris block Height and Width
 Height = 0
@@ -112,8 +134,7 @@ def break_lines():
             lines += 1
             for k in range(i, 1, -1):
                 for j in range(Width):
-                    Field[k][j] = Field[k - 1][j]
-                    
+                    Field[k][j] = Field[k - 1][j]            
     Score += lines ** 2 # code smell - what if I want to use other stragies for score computation?    
 
     if HighScore < Score:
@@ -188,11 +209,14 @@ def draw_figure(screen, image, x, y, shift_x, shift_y, zoom):
                                   y + zoom * (i + shift_y) + 1,
                                   zoom - 2, zoom - 2])
             
-def initialize(height, width):
-    global Height, Width, Field, State
+def initialize(height, width, isMission):
+    global Height, Width, Field, State, MissionField
     Height = height
     Width = width
-    Field = []
+    if isMission == True:
+        Field = MissionField
+    else:
+        Field = []
     State = "start"
     # code smell - why another initializion in the initalize() function?
     init_board()
@@ -209,8 +233,8 @@ def main():
     counter = 0
     pressing_down = False
 
-    initialize(20, 10) # code smell - what is 20 and 10? Can we use keyword argument? 
-    make_figure(3,0)
+    #initialize(20, 10, False) # code smell - what is 20 and 10? Can we use keyword argument? 
+    #make_figure(3,0)
     done = False
     while not done:
         counter += 1
@@ -245,20 +269,30 @@ def main():
                 if event.type == pygame.QUIT:
                     done = True
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_q: #let's refactor to game over specific things maybe
+                    if event.key == pygame.K_q:
                         if State == "gameover":
                             done = True
                     if event.key == pygame.K_s:
                         if State == "gameover":
-                            initialize(20,10)
+                            initialize(20,10, False)
                             make_figure(3,0)
                             pressing_down = False
                             done = False
-                
-        draw_board(screen = screen, x = StartX, y = StartY, zoom = Tzoom)
-        
-        # code smell - how many values duplication Figures[Type][Rotation]
-        draw_figure(screen = screen, image = Figures[Type][Rotation], x = StartX, y = StartY, shift_x = ShiftX, shift_y = ShiftY, zoom = Tzoom)
+                    if event.key == pygame.K_m:
+                        if State == "gameover":
+                            #State = "mission"
+                            initialize(20,10, True)
+                            make_figure(3,0)
+                            pressing_down = False
+                            done = False
+
+
+        if State == "start":
+            draw_board(screen = screen, x = StartX, y = StartY, zoom = Tzoom)   
+
+            # code smell - how many values duplication Figures[Type][Rotation]
+            draw_figure(screen = screen, image = Figures[Type][Rotation], x = StartX, y = StartY, shift_x = ShiftX, shift_y = ShiftY, zoom = Tzoom)
+
 
         font = pygame.font.SysFont('Calibri', 25, True, False)
         global Score
@@ -269,12 +303,14 @@ def main():
         
         if State == "gameover":
             font1 = pygame.font.SysFont('Calibri', 25, True, False)
-            text_game_over = font1.render("Game Over", True, (255, 125, 0))
-            text_game_over1 = font1.render("Enter q to Quit", True, (255, 215, 0)) 
-            text_game_over2 = font1.render("Press S to restart", True, (255,215,0))        
-            screen.blit(text_game_over, [20, 200])
+            #text_game_over = font1.render("Game Over", True, (255, 125, 0))
+            text_game_over1 = font1.render("Press Q to quit", True, (255, 215, 0)) 
+            text_game_over2 = font1.render("Press S for endless mode", True, (255,215,0))   
+            text_game_over3 = font1.render("Press M for mission mode", True, (255,215,0))      
+            #screen.blit(text_game_over, [20, 200])
             screen.blit(text_game_over1, [25, 265])
             screen.blit(text_game_over2, [25, 300])
+            screen.blit(text_game_over3, [25, 335])
 
         # refresh the screen
         pygame.display.flip()
