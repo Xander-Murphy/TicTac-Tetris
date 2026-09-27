@@ -2,16 +2,17 @@ import pygame
 import random
 
 # Global constants - it's OK as it's read only
-# code smell - why list when tuple (immutable) is OK? Use immutable objects as much as possible
-Colors = [
+
+Colors = (
     (0, 0, 0),
-    (120, 37, 179),
-    (100, 179, 179),
-    (80, 34, 22),
-    (80, 134, 22),
-    (180, 34, 22),
-    (180, 34, 122),
-]
+    (241, 239, 47),
+    (136, 44, 237),
+    (138, 234, 40),
+    (207, 54, 22),
+    (0, 0, 240),
+    (221, 164, 34),
+    (0, 240, 240),
+)
 
 # Define some colors
 BLACK = (0, 0, 0)
@@ -35,8 +36,30 @@ Type = 0
 Color = 0
 Rotation = 0
 
-State = "start" # or "gameover"
+State = "gameover" # or "start", or "mission"
 Field = []
+MissionField = [
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,0,0,0,0,0,0,0,0,0],
+    [0,5,0,0,0,0,0,0,0,0],
+    [0,5,0,0,0,0,0,0,0,0],
+    [5,5,3,0,0,0,6,6,6,0],
+    [1,1,3,3,7,0,6,5,5,5],
+    [1,1,0,3,7,1,1,0,2,5],
+    [6,6,6,6,7,1,1,0,2,2],
+    [6,6,4,4,7,0,4,4,2,7],
+    [6,6,2,4,4,0,5,4,4,7],
+    [1,1,2,2,3,3,5,0,0,7],
+    [1,1,2,3,3,5,5,0,0,7],
+]
 
 # Tetris block Height and Width
 Height = 0
@@ -50,6 +73,7 @@ Tzoom = 20 # code smell - bad name, can you guess Tzoom from its name?
 ShiftX = 0
 ShiftY = 0
 Score = 0
+HighScore = 0
 
 # code smell - global variable access, refactor to use
 # parameters (if you use a function) or class fields (if you use a class)
@@ -58,7 +82,23 @@ def make_figure(x, y):
     ShiftX = x
     ShiftY = y
     Type = random.randint(0, len(Figures) - 1)
-    Color = random.randint(1, len(Colors) - 1)
+    #Color = random.randint(1, len(Colors) - 1)
+    #print(Type, ", ", Color)
+    if Type == 0:
+        Color = 7 #cyan
+    elif Type == 1:
+        Color = 4 #red
+    elif Type == 2:
+        Color = 3 #green
+    elif Type == 3:
+        Color = 5
+    elif Type == 4:
+        Color = 6
+    elif Type == 5:
+        Color = 2 #purple
+    elif Type == 6:
+        Color = 1 #yellow
+    
     Rotation = 0
 
 def intersects(image):
@@ -82,7 +122,7 @@ def break_lines():
     #  is_filled = check_row_filled(...)
     #  if is_filled:
     #.   delete_row(...)
-    global Height, Field, Score
+    global Height, Field, Score, HighScore
     lines = 0
     for i in range(1, Height):
         zeros = 0
@@ -94,9 +134,11 @@ def break_lines():
             lines += 1
             for k in range(i, 1, -1):
                 for j in range(Width):
-                    Field[k][j] = Field[k - 1][j]
-                    
+                    Field[k][j] = Field[k - 1][j]            
     Score += lines ** 2 # code smell - what if I want to use other stragies for score computation?    
+
+    if HighScore < Score:
+        HighScore = Score
 
 def freeze(image):
     # code smell - can you guess what it does? why there is no comments on what it does, how, and why?
@@ -167,11 +209,14 @@ def draw_figure(screen, image, x, y, shift_x, shift_y, zoom):
                                   y + zoom * (i + shift_y) + 1,
                                   zoom - 2, zoom - 2])
             
-def initialize(height, width):
-    global Height, Width, Field, State
+def initialize(height, width, isMission):
+    global Height, Width, Field, State, MissionField
     Height = height
     Width = width
-    Field = []
+    if isMission == True:
+        Field = MissionField
+    else:
+        Field = []
     State = "start"
     # code smell - why another initializion in the initalize() function?
     init_board()
@@ -188,8 +233,8 @@ def main():
     counter = 0
     pressing_down = False
 
-    initialize(20, 10) # code smell - what is 20 and 10? Can we use keyword argument? 
-    make_figure(3,0)
+    #initialize(20, 10, False) # code smell - what is 20 and 10? Can we use keyword argument? 
+    #make_figure(3,0)
     done = False
     while not done:
         counter += 1
@@ -200,44 +245,72 @@ def main():
         if counter % (fps // 2) == 0 or pressing_down: 
             if State == "start":
                 go_down()
+        if State == "start":
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    done = True
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        rotate()
+                    if event.key == pygame.K_LEFT:
+                        go_side(-1)
+                    if event.key == pygame.K_RIGHT:
+                        go_side(1)
+                    if event.key == pygame.K_SPACE:
+                        go_space()
+                    if event.key == pygame.K_DOWN:
+                        pressing_down = True
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                done = True
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    rotate()
-                if event.key == pygame.K_LEFT:
-                    go_side(-1)
-                if event.key == pygame.K_RIGHT:
-                    go_side(1)
-                if event.key == pygame.K_SPACE:
-                    go_space()
-                if event.key == pygame.K_q:
-                    if State == "gameover":
-                        done = True
-                if event.key == pygame.K_DOWN:
-                    pressing_down = True
+                if event.type == pygame.KEYUP and event.key == pygame.K_DOWN:
+                    pressing_down = False
 
-            if event.type == pygame.KEYUP and event.key == pygame.K_DOWN:
-                pressing_down = False
-                
-        draw_board(screen = screen, x = StartX, y = StartY, zoom = Tzoom)
-        
-        # code smell - how many values duplication Figures[Type][Rotation]
-        draw_figure(screen = screen, image = Figures[Type][Rotation], x = StartX, y = StartY, shift_x = ShiftX, shift_y = ShiftY, zoom = Tzoom)
+        if State == "gameover":
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    done = True
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        if State == "gameover":
+                            done = True
+                    if event.key == pygame.K_s:
+                        if State == "gameover":
+                            initialize(20,10, False)
+                            make_figure(3,0)
+                            pressing_down = False
+                            done = False
+                    if event.key == pygame.K_m:
+                        if State == "gameover":
+                            #State = "mission"
+                            initialize(20,10, True)
+                            make_figure(3,0)
+                            pressing_down = False
+                            done = False
+
+
+        if State == "start":
+            draw_board(screen = screen, x = StartX, y = StartY, zoom = Tzoom)   
+
+            # code smell - how many values duplication Figures[Type][Rotation]
+            draw_figure(screen = screen, image = Figures[Type][Rotation], x = StartX, y = StartY, shift_x = ShiftX, shift_y = ShiftY, zoom = Tzoom)
+
 
         font = pygame.font.SysFont('Calibri', 25, True, False)
         global Score
         text = font.render("Score: " + str(Score), True, BLACK)
         screen.blit(text, [0, 0])
+        textHi = font.render("High Score: " + str(HighScore), True, BLACK)
+        screen.blit(textHi, [0, 24])
         
         if State == "gameover":
-            font1 = pygame.font.SysFont('Calibri', 65, True, False)
-            text_game_over = font1.render("Game Over", True, (255, 125, 0))
-            text_game_over1 = font1.render("Enter q to Quit", True, (255, 215, 0))        
-            screen.blit(text_game_over, [20, 200])
+            font1 = pygame.font.SysFont('Calibri', 25, True, False)
+            #text_game_over = font1.render("Game Over", True, (255, 125, 0))
+            text_game_over1 = font1.render("Press Q to quit", True, (255, 215, 0)) 
+            text_game_over2 = font1.render("Press S for endless mode", True, (255,215,0))   
+            text_game_over3 = font1.render("Press M for mission mode", True, (255,215,0))      
+            #screen.blit(text_game_over, [20, 200])
             screen.blit(text_game_over1, [25, 265])
+            screen.blit(text_game_over2, [25, 300])
+            screen.blit(text_game_over3, [25, 335])
 
         # refresh the screen
         pygame.display.flip()
