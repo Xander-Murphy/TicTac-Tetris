@@ -23,7 +23,7 @@ The Milestones (goals) for the week
   - Acceptance tests:0
   - Integration tests: 0
   - Unit tests: 39
-- Total LoC (lines of code): 543
+- Total LoC (lines of code): 882
 
 ---
 
