@@ -9,7 +9,7 @@ that's the abstraction boundary.
 Like Board and Piece, Game has no pygame dependency, so all of this
 can be unit tested with no display attached.
 """
-from typing import Optional
+
 import random
 
 from board import Board
@@ -32,8 +32,8 @@ class Game:
         self.high_score = 0
         self.state = "gameover"
         self.is_mission = False
-        self.board: Optional[Board] = None
-        self.current_piece: Optional[Piece] = None
+        self.board = None
+        self.current_piece = None
 
     def reset(self, height, width, is_mission=False):
         """
@@ -61,11 +61,15 @@ class Game:
         self._try_move(1, 0)
 
     def _try_move(self, dx, dy):
+        assert self.board is not None and self.current_piece is not None, \
+            "_try_move() called before the game has started"
         self.current_piece.move(dx, dy)
         if self.board.intersects(self.current_piece):
             self.current_piece.move(-dx, -dy)  # revert
 
     def rotate_current_piece(self):
+        assert self.board is not None and self.current_piece is not None, \
+            "rotate_current_piece() called before the game has started"
         old_rotation = self.current_piece.rotation
         self.current_piece.rotate()
         if self.board.intersects(self.current_piece):
@@ -73,6 +77,8 @@ class Game:
 
     def soft_drop(self):
         """Move the current piece down one row, locking it if it can't."""
+        assert self.board is not None and self.current_piece is not None, \
+            "soft_drop() called before the game has started"
         self.current_piece.move(0, 1)
         if self.board.intersects(self.current_piece):
             self.current_piece.move(0, -1)
@@ -80,12 +86,16 @@ class Game:
 
     def hard_drop(self):
         """Drop the current piece straight to the floor and lock it."""
+        assert self.board is not None and self.current_piece is not None, \
+            "hard_drop() called before the game has started"
         while not self.board.intersects(self.current_piece):
             self.current_piece.move(0, 1)
         self.current_piece.move(0, -1)
         self._lock_and_advance()
 
     def _lock_and_advance(self):
+        assert self.board is not None and self.current_piece is not None, \
+            "_lock_and_advance() called before the game has started"
         self.board.lock_piece(self.current_piece)
         lines_cleared = self.board.clear_full_lines()
         self.score += lines_cleared ** 2
