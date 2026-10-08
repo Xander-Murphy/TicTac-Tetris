@@ -1,7 +1,7 @@
 import pygame
-from .Scenes import Scene
-from Elements.Scenes.TestScene import TestScene
-from Elements.Scenes.ErrorScene import ErrorScene
+from .scenes import scene
+from elements.scenes.testScene import TestScene
+from elements.scenes.errorScene import ErrorScene
 
 class SceneManager:
     def __init__(self, initScene : str, screen: pygame.Surface):
@@ -9,15 +9,15 @@ class SceneManager:
 
         # put all scenes here
         self.all_scenes = [
-            TestScene(self.SCREEN, "TestScene"),
-            ErrorScene(self.SCREEN, "ErrorScene")
+            TestScene(self.SCREEN, "testScene"),
+            ErrorScene(self.SCREEN, "errorScene")
         ]
         self.SCENES = self.get_all_scenes()
 
         # start the init scene
         if initScene not in self.SCENES:
             raise KeyError("Initial scene could not be found")
-        self.CURRENT_SCENE : Scene = self.SCENES[initScene]
+        self.CURRENT_SCENE : scene = self.SCENES[initScene]
 
         self.CURRENT_SCENE.enter()
 
@@ -34,6 +34,9 @@ class SceneManager:
 
         if new_scene is None:
             raise KeyError("New Scene could not be found")
+
+        if current_scene != self.CURRENT_SCENE:
+            raise KeyError("Current scene does not match")
         
         self.CURRENT_SCENE.exit()
         self.CURRENT_SCENE = new_scene

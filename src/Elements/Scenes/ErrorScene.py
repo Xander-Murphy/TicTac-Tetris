@@ -1,5 +1,5 @@
 import pygame
-from .Scene import Scene
+from .scene import Scene
 
 class ErrorScene(Scene):
     def __init__(self, screen: pygame.Surface, name: str = "default"):
