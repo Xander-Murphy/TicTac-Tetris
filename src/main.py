@@ -1,10 +1,12 @@
 import pygame
 
-from game import Game
-from ui import UIMenu
+from Elements.GameLogic.game import Game
+from Elements.UI.gameUI import UIMenu
+from Elements.SceneManager import SceneManager
 
 SIZE = (400, 500)
 FPS = 25
+STARTING_SCENE = "TestScene"
 
 
 def main():
@@ -15,6 +17,7 @@ def main():
 
     game = Game(20, 10)
     ui = UIMenu(screen)
+    scene_manager = SceneManager(STARTING_SCENE, screen)
 
     counter = 0
     done = False
@@ -34,6 +37,7 @@ def main():
             ui.draw_piece(game.current_piece)
 
         ui.draw_hud(game.score, game.high_score)
+        scene_manager.update()
 
         if game.state == "gameover":
             ui.draw_game_over_screen()

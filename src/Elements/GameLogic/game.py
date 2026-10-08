@@ -12,9 +12,9 @@ can be unit tested with no display attached.
 
 import random
 
-from board import Board
-from piece import Piece, PIECE_SHAPES
-from mission_data import MISSION_FIELD
+from Elements.GameLogic.board import Board
+from Elements.GameLogic.piece import Piece, PIECE_SHAPES
+from Elements.MissionData.mission_data import MISSION_FIELD
 
 
 class Game:
