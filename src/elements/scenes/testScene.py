@@ -23,8 +23,7 @@ class TestScene(Scene):
         if self.game.state == "start" and (self.counter % (self.FPS // 2) == 0 or self.ui.pressing_down):
             self.game.soft_drop()
 
-        if self.ui.handle_input(self.game):
-            pygame.quit()
+        self.ui.handle_input(self.game)
 
         if self.game.state == "start":
             self.ui.draw_board(self.game.board)

@@ -1,6 +1,7 @@
 import pygame
 
-from elements.SceneManager import SceneManager
+from elements.sceneManager import SceneManager
+from elements.eventManager import EventManager
 
 SIZE = (850, 500)
 FPS = 25
@@ -16,6 +17,13 @@ def main():
     scene_manager = SceneManager(STARTING_SCENE, screen)
 
     done = False
+
+    def stopPygame():
+        nonlocal done
+        done = True
+
+    EventManager.onQuitGame.append(stopPygame)
+
     while not done:
 
         # update the current scene
