@@ -2,6 +2,7 @@ import pygame
 from .scenes import scene
 from elements.scenes.testScene import TestScene
 from elements.scenes.errorScene import ErrorScene
+from elements.scenes.startScene import StartScene
 
 class SceneManager:
     def __init__(self, initScene : str, screen: pygame.Surface):
@@ -10,7 +11,8 @@ class SceneManager:
         # put all scenes here
         self.all_scenes = [
             TestScene(self.SCREEN, "testScene"),
-            ErrorScene(self.SCREEN, "errorScene")
+            ErrorScene(self.SCREEN, "errorScene"),
+            StartScene(self.SCREEN, "startScene")
         ]
         self.SCENES = self.get_all_scenes()
 
@@ -48,6 +50,8 @@ class SceneManager:
                 self.change_scene(event[1], event[2])
         
         self.CURRENT_SCENE.update()
+
+        # EXAMPLE - self.EVENTS.append(("change_scene", self, "testScene"))
 
     def get_screen(self):
         return self.SCREEN

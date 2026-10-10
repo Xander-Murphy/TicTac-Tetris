@@ -5,7 +5,7 @@ from elements.eventManager import EventManager
 
 SIZE = (850, 500)
 FPS = 25
-STARTING_SCENE = "testScene"
+STARTING_SCENE = "startScene"
 
 
 def main():
@@ -25,6 +25,9 @@ def main():
     EventManager.onQuitGame.append(stopPygame)
 
     while not done:
+
+        if pygame.event.peek(pygame.QUIT):
+            stopPygame()
 
         # update the current scene
         scene_manager.update()

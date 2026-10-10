@@ -5,7 +5,7 @@ from ..UI.gameUI import UIMenu
 
 
 class TestScene(Scene):
-    def __init__(self, screen: pygame.Surface, name: str = "TestScene"):
+    def __init__(self, screen: pygame.Surface, name: str = "testScene"):
         super().__init__(screen, name)
 
     def enter(self):
