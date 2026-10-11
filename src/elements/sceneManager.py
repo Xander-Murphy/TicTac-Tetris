@@ -1,5 +1,6 @@
 import pygame
 from .scenes import scene
+from .eventManager import EventManager
 from elements.scenes.testScene import TestScene
 from elements.scenes.errorScene import ErrorScene
 from elements.scenes.startScene import StartScene
@@ -14,8 +15,12 @@ class SceneManager:
             ErrorScene(self.SCREEN, "errorScene"),
             StartScene(self.SCREEN, "startScene")
         ]
+        # Dict with SceneName : SceneObject
         self.SCENES = self.get_all_scenes()
 
+        # Add change scene to event manager
+        EventManager.onSceneChange.append(self.change_scene)
+        
         # start the init scene
         if initScene not in self.SCENES:
             raise KeyError("Initial scene could not be found")
@@ -45,10 +50,6 @@ class SceneManager:
         self.CURRENT_SCENE.enter()
 
     def update(self):
-        for event in self.CURRENT_SCENE.EVENTS:
-            if event[0] == "change_scene":
-                self.change_scene(event[1], event[2])
-        
         self.CURRENT_SCENE.update()
 
         # EXAMPLE - self.EVENTS.append(("change_scene", self, "testScene"))

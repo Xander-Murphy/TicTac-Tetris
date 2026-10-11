@@ -52,7 +52,7 @@ class StartScene(Scene):
         quitButton : ImageButton = self.imageButtons.get("Quit Button")
 
         if startButton.is_clicked():
-            self.EVENTS.append(("change_scene", self, "testScene"))
+            EventManager.changeScene(self, "testScene")
 
         if quitButton.is_clicked():
             EventManager.quitGame()
