@@ -11,16 +11,19 @@ class StartScene(Scene):
         self.SCREEN.fill("blue")
 
         # Todo 
-        # 1. Add this functionality to ImageButton class
+        # 1. Add this functionality to ImageButton class 
+        # 2. Function to center images no matter the window
         
         imageFiles : dict = {
              "Start Button" : 'src/assets/ResizedStartButtonPlaceholder.png',
              "Quit Button" : 'src/assets/QuitButtonPlaceholder.png',
+             "Logo" : 'src/assets/Tic-TacTetrisLogoPlaceholder.png'
         }
 
         imageData : dict = { #(x, y, scale)
-             "Start Button" : (100, 100, 10),
-             "Quit Button" : (100, 200, 10),
+             "Start Button" : (50, 300, 6),
+             "Quit Button" : (50, 400, 6),
+             "Logo" : (250, 50, 10) # Add center function later
         }
         
         self.imageButtons : dict = {}
