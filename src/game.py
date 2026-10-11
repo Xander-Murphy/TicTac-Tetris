@@ -104,4 +104,14 @@ class Game:
 
         self.spawn_piece()
         if self.board.intersects(self.current_piece):
+            self._save_high_score()
             self.state = "gameover"
+
+    def _save_high_score(self):
+        file = open("score.txt", "w")
+        file.write(str(self.high_score))
+        file.close()
+
+    def _load_high_score(self):
+        file = open("score.txt", "r")
+        file.close()
