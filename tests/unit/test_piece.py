@@ -3,7 +3,7 @@ Unit tests for piece.py. No pygame dependency, no fixtures needed -
 each Piece is self-contained, unlike the old global-variable version.
 """
 
-from piece import Piece, PIECE_SHAPES, PIECE_COLORS
+from Elements.GameLogic.piece import Piece, PIECE_SHAPES, PIECE_COLORS
 
 
 def test_piece_starts_at_given_position_with_rotation_zero():
