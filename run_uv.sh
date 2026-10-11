@@ -2,5 +2,5 @@
 
 uv init --bare
 uv venv
-uv add pygame
-uv run src/tetris.py
+uv add pygame-ce
+uv run src/main.py

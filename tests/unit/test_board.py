@@ -7,8 +7,8 @@ than a hand-rolled fake - Board.intersects()/lock_piece() only need an
 object with .x, .y, .image() and .color, which Piece already is.
 """
 
-from Elements.GameLogic.board import Board
-from Elements.GameLogic.piece import Piece
+from elements.gameLogic.board import Board
+from elements.gameLogic.piece import Piece
 
 
 # A simple 2x2 square piece (Type 6, rotation 0) is used throughout as
