@@ -11,9 +11,9 @@ import random
 
 import pytest
 
-from Elements.GameLogic.game import Game
-from Elements.GameLogic.piece import PIECE_SHAPES
-from Elements.MissionData.mission_data import MISSION_FIELD
+from elements.gameLogic.game import Game
+from elements.gameLogic.piece import PIECE_SHAPES
+from elements.missionData.mission_data import MISSION_FIELD
 
 
 def fixed_random(value):
