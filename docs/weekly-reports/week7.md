@@ -46,10 +46,10 @@ This feature would bring the piece down instantly without delay at the push of t
 ---
 
 # Tests counts
-  - Acceptance tests:0
-  - Integration tests: 0
-  - Unit tests: 39
-- Total LoC (lines of code): 945
+  - Acceptance tests:4
+  - Integration tests: 3
+  - Unit tests: 66
+- Total LoC (lines of code): 1376
 
 ---
 

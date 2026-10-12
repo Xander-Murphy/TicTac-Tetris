@@ -154,3 +154,10 @@ def test_clear_full_lines_row_index_1_quirk_is_preserved():
     lines_cleared = board.clear_full_lines()
     assert lines_cleared == 1
     assert board.grid[1] == [9, 9, 9]  # unchanged, per the quirk above
+
+
+def test_clear_full_lines_clears_two_rows_at_once():
+    board = Board(height=5, width=3)
+    board.grid = [[0, 0, 0], [0, 0, 0], [2, 0, 0], [9, 9, 9], [8, 8, 8]]
+    assert board.clear_full_lines() == 2
+    assert board.grid[4] == [2, 0, 0]
