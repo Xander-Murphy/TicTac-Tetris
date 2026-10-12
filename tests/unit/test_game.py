@@ -11,9 +11,9 @@ import random
 
 import pytest
 
-from Elements.GameLogic.game import Game
-from Elements.GameLogic.piece import PIECE_SHAPES
-from Elements.MissionData.mission_data import MISSION_FIELD
+from elements.gameLogic.game import Game
+from elements.gameLogic.piece import PIECE_SHAPES
+from elements.missionData.mission_data import MISSION_FIELD
 
 
 def fixed_random(value):
@@ -212,3 +212,32 @@ def test_gameplay_methods_assert_if_called_before_reset(method_name):
     method = getattr(game, method_name)
     with pytest.raises(AssertionError):
         method()
+
+
+def test_clearing_two_lines_scores_four_and_raises_high_score(monkeypatch):
+    monkeypatch.setattr(random, "randint", fixed_random(6))
+    game = Game(4, 4)
+    game.reset(4, 4, is_mission=False)
+    game.board.grid = [[0, 0, 0, 0], [0, 0, 0, 0], [9, 9, 0, 0], [9, 9, 0, 0]]
+    game.current_piece.x = 1  # O-piece fills columns 2 and 3
+    game.hard_drop()
+    assert game.score == 4
+    assert game.high_score == 4
+
+
+def test_move_reverts_when_blocked_by_left_wall(monkeypatch):
+    monkeypatch.setattr(random, "randint", fixed_random(6))
+    game = Game(20, 10)
+    game.reset(20, 10, is_mission=False)
+    game.current_piece.x = -1  # O-piece already against column 0
+    game.move_left()
+    assert game.current_piece.x == -1
+
+
+def test_playing_mission_mode_never_changes_mission_field(monkeypatch):
+    monkeypatch.setattr(random, "randint", fixed_random(6))
+    snapshot = [row[:] for row in MISSION_FIELD]
+    game = Game(20, 10)
+    game.reset(20, 10, is_mission=True)
+    game.hard_drop()
+    assert MISSION_FIELD == snapshot

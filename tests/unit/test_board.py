@@ -7,8 +7,8 @@ than a hand-rolled fake - Board.intersects()/lock_piece() only need an
 object with .x, .y, .image() and .color, which Piece already is.
 """
 
-from Elements.GameLogic.board import Board
-from Elements.GameLogic.piece import Piece
+from elements.gameLogic.board import Board
+from elements.gameLogic.piece import Piece
 
 
 # A simple 2x2 square piece (Type 6, rotation 0) is used throughout as
@@ -154,3 +154,10 @@ def test_clear_full_lines_row_index_1_quirk_is_preserved():
     lines_cleared = board.clear_full_lines()
     assert lines_cleared == 1
     assert board.grid[1] == [9, 9, 9]  # unchanged, per the quirk above
+
+
+def test_clear_full_lines_clears_two_rows_at_once():
+    board = Board(height=5, width=3)
+    board.grid = [[0, 0, 0], [0, 0, 0], [2, 0, 0], [9, 9, 9], [8, 8, 8]]
+    assert board.clear_full_lines() == 2
+    assert board.grid[4] == [2, 0, 0]
