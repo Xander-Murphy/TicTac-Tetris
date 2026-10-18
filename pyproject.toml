@@ -1,8 +1,7 @@
 [project]
 name = "tictac-tetris"
 version = "0.1.0"
-requires-python = ">=3.13"
+requires-python = ">=3.15"
 dependencies = [
-    "pygame-ce",
-    "pytest>=9.1.1",
+    "pygame-ce>=2.5.8",
 ]

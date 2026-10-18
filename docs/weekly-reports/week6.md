@@ -15,7 +15,7 @@ The Milestones (goals) for the week
 
 - Burndown rates
   - Features: 0/4
-  - Requirements: 1/13
+  - Requirements: 1/12
 
 ---
 

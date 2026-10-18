@@ -7,6 +7,7 @@ display attached.
 """
 
 import pygame
+from ..eventManager import EventManager
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -103,7 +104,8 @@ class UIMenu:
             if event.type == pygame.KEYUP and event.key == pygame.K_DOWN:
                 self.pressing_down = False
 
-        return quit_requested
+        if quit_requested:
+            EventManager.quitGame()
 
     def _handle_playing_key(self, event, game):
         if event.key == pygame.K_UP:
