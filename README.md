@@ -3,6 +3,7 @@
 TicTac Tetris is a team project focused on improving and expanding a bare-bones Tetris game using better software design and new gameplay features.
 
 **Course:** [ASE 420 - Canvas](https://nku.instructure.com/courses/91834/pages/tictac-tetris-team-project)
+**Sprint 1 Video:** [Demo Video Link](https://youtu.be/5o_v7tIgjuc)
 ## Team
 
 * **Xander Murphy** — Architecture, Design & Refactoring
@@ -22,14 +23,14 @@ TicTac Tetris is a team project focused on improving and expanding a bare-bones 
 
 * Python
 * uv
-* Pygame
+* Pygame-ce
 
 ### Run
 
 ```bash
 uv venv
-uv add pygame
-uv run src/tetris.py
+uv add pygame-ce
+uv run src/main.py
 ```
 
 ## Development Plan
