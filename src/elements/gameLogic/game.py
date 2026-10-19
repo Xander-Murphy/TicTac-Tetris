@@ -99,9 +99,24 @@ class Game:
         self.board.lock_piece(self.current_piece)
         lines_cleared = self.board.clear_full_lines()
         self.score += lines_cleared ** 2
+
         if self.high_score < self.score:
             self.high_score = self.score
 
         self.spawn_piece()
         if self.board.intersects(self.current_piece):
+            self._save_high_score()
             self.state = "gameover"
+
+        if self.is_mission and self.board.grid[17] == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]:
+            self._save_high_score()
+            self.state = "gameover"
+
+    def _save_high_score(self):
+        file = open("score.txt", "w")
+        file.write(str(self.high_score))
+        file.close()
+
+    def _load_high_score(self):
+        file = open("score.txt", "r")
+        file.close()

@@ -36,14 +36,19 @@ class UIMenu:
 
     # -- Drawing -----------------------------------------------------
 
-    def draw_board(self, board):
+    def draw_board(self, board, is_mission):
         self.screen.fill(WHITE)
         x, y, zoom = self.start_x, self.start_y, self.zoom
         for i in range(board.height):
             for j in range(board.width):
-                pygame.draw.rect(
-                    self.screen, GRAY, [x + zoom * j, y + zoom * i, zoom, zoom], 1
-                )
+                if i == 17 and is_mission:
+                    pygame.draw.rect(
+                        self.screen, (255,0,0), [x + zoom * j, y + zoom * i, zoom, zoom], 1
+                    )
+                else:
+                    pygame.draw.rect(
+                        self.screen, GRAY, [x + zoom * j, y + zoom * i, zoom, zoom], 1
+                    )
                 if board.is_cell_occupied(i, j):
                     pygame.draw.rect(
                         self.screen,
