@@ -10,6 +10,13 @@ paginate: true
 
 ---
 
+## What Went Well (Team Level):
+- Refactor of the base game
+- Fixing issues presented
+- Quality of deliverables
+
+---
+
 ## What Went Wrong (Team Level):
 - Beginning we had some file permission issues
 - problems with pygame dependency
@@ -17,10 +24,24 @@ paginate: true
 
 ---
 
-## What Went Well (Team Level):
-- Refactor of the base game
-- Fixing issues presented
-- Quality of deliverables
+## What We Learned (Xander)
+| Problem | Solution| Result | 
+|---------|---------|--------|
+|The original prototype code was disorganized and hard to read/expand|Refactor original codebase to be spread out into multiple files|Separated clean codebase for the team to work through|
+
+---
+
+## What We Learned (Tanner)
+| Problem | Solution| Result | 
+|---------|---------|--------|
+|I wanted to extend the existing Button class to support image-based buttons while preserving its current functionality|Apply the Open-Closed Principle by creating a subclass that inherits the existing functionality and introduces a constructor and functionality specific buttons.|The system supports an additional button type while preserving existing Button usage, reducing the need to modify existing code|
+
+---
+
+## What We Learned (Joseph)
+| Problem | Solution| Result | 
+|---------|---------|--------|
+|Manually creating new missions was time consuming and was a lot of code duplication|Create a tool that lets developers create prefilled boards with a simple UI interface|Easier extensability of existing code without having to write anything extra|
 
 ---
 
