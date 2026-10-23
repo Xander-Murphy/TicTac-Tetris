@@ -19,7 +19,7 @@ def mouse(monkeypatch):
     ((41, 40), True, False),    # just outside, pressed
 ])
 def test_button_is_clicked_only_when_pressed_over_it(screen, mouse, pos, down, clicked):
-    button = Button(10, 20, 30, 40, "red", screen)  # x 10..40, y 20..60
+    button = Button(10, 20, 30, 40, screen, "red")  # x 10..40, y 20..60
     mouse["pos"], mouse["down"] = pos, down
     assert button.is_clicked() is clicked
 

@@ -26,6 +26,7 @@ def main():
 
     while not done:
 
+        # Look at events without clearing the event queue
         if pygame.event.peek(pygame.QUIT):
             stopPygame()
 

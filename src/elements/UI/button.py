@@ -5,7 +5,7 @@ import pygame
 
 
 class Button:
-    def __init__(self, x, y, width, height, color, screen : pygame.surface):
+    def __init__(self, x, y, width, height, screen : pygame.surface, color = "black"):
         self.x = x
         self.y = y
         self.width = width

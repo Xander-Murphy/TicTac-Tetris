@@ -8,20 +8,21 @@ display attached.
 
 import pygame
 from ..eventManager import EventManager
+from ..gameLogic.cell import Cell
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 
 Colors = (
-    (0, 0, 0),
-    (241, 239, 47),
-    (136, 44, 237),
-    (138, 234, 40),
-    (207, 54, 22),
-    (0, 0, 240),
-    (221, 164, 34),
-    (0, 240, 240),
+    (0, 0, 0),        # White
+    (241, 239, 47),   # Yellow
+    (136, 44, 237),   # Purple
+    (138, 234, 40),   # Green
+    (207, 54, 22),    # Red
+    (0, 0, 240),      # Blue
+    (221, 164, 34),   # Orange
+    (0, 240, 240),    # Cyan
 )
 
 
@@ -39,16 +40,21 @@ class UIMenu:
     def draw_board(self, board):
         self.screen.fill(WHITE)
         x, y, zoom = self.start_x, self.start_y, self.zoom
-        for i in range(board.height):
-            for j in range(board.width):
+        for col in range(board.height):
+            for row in range(board.width):
+                # Outline of cell
                 pygame.draw.rect(
-                    self.screen, GRAY, [x + zoom * j, y + zoom * i, zoom, zoom], 1
+                    self.screen, GRAY, [x + zoom * row, y + zoom * col, zoom, zoom], 1
                 )
-                if board.is_cell_occupied(i, j):
+
+                # Cell texture if filled with a piece
+                cell = board.grid[col][row]
+                if board.is_cell_occupied(cell):
+                    texture = cell.tileTexture
                     pygame.draw.rect(
                         self.screen,
-                        Colors[board.grid[i][j]],
-                        [x + zoom * j + 1, y + zoom * i + 1, zoom - 2, zoom - 1],
+                        Colors[texture],
+                        [x + zoom * row + 1, y + zoom * col + 1, zoom - 2, zoom - 1],
                     )
 
     def draw_piece(self, piece):

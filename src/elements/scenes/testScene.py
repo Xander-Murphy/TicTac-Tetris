@@ -11,8 +11,8 @@ class TestScene(Scene):
     def enter(self):
         self.counter : int = 0
         self.game = Game(20, 10)
-        self.ui = UIMenu(self.SCREEN)
-        self.FPS = 25
+        self.ui = UIMenu(self.SCREEN) # use default values for start_x, start_y, and zoom
+        self.PhysicsUpdate = 25
     
     def update(self):
         self.counter += 1
@@ -20,7 +20,7 @@ class TestScene(Scene):
         if self.counter > 100000:
             self.counter = 0
 
-        if self.game.state == "start" and (self.counter % (self.FPS // 2) == 0 or self.ui.pressing_down):
+        if self.game.state == "start" and (self.counter % (self.PhysicsUpdate // 2) == 0 or self.ui.pressing_down):
             self.game.soft_drop()
 
         self.ui.handle_input(self.game)
