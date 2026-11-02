@@ -12,7 +12,7 @@ The Milestones (goals) for the week
 
 ---
 
-# The progress
+# Sprint 2 Progress
 
 - Burndown rates
   - Features: 0/3
