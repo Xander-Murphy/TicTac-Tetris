@@ -8,6 +8,7 @@ display attached.
 
 import pygame
 from ..eventManager import EventManager
+from ..gameLogic.game import Game
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -76,8 +77,8 @@ class UIMenu:
     def draw_game_over_screen(self):
         lines = [
             "Press Q to quit",
-            "Press S for endless mode",
-            "Press M for mission mode",
+            "Press R to restart",
+            "Press M to go back to main menu",
         ]
         for offset, line in enumerate(lines):
             text = self.font.render(line, True, (255, 215, 0))
@@ -85,7 +86,7 @@ class UIMenu:
 
     # -- Input ---------------------------------------------------------
 
-    def handle_input(self, game):
+    def handle_input(self, game, scene="errorScene"):
         """
         Reads pygame events and calls the matching Game method.
         Returns True if the player asked to quit the program entirely.
@@ -99,7 +100,7 @@ class UIMenu:
                 if game.state == "start":
                     quit_requested |= self._handle_playing_key(event, game)
                 elif game.state == "gameover":
-                    quit_requested |= self._handle_end_screen_key(event, game)
+                    quit_requested |= self._handle_end_screen_key(event, game, scene)
 
             if event.type == pygame.KEYUP and event.key == pygame.K_DOWN:
                 self.pressing_down = False
@@ -120,13 +121,14 @@ class UIMenu:
             self.pressing_down = True
         return False
 
-    def _handle_end_screen_key(self, event, game):
+    def _handle_end_screen_key(self, event, game : Game, scene="errorScene"):
         if event.key == pygame.K_q:
             return True
-        elif event.key == pygame.K_s:
-            game.reset(20, 10, is_mission=False)
+        elif event.key == pygame.K_r:
+            is_mission = game.is_mission
+            game.reset(20, 10, is_mission)
             self.pressing_down = False
         elif event.key == pygame.K_m:
-            game.reset(20, 10, is_mission=True)
+            EventManager.changeScene(scene, "startScene")
             self.pressing_down = False
         return False

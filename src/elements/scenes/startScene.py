@@ -17,13 +17,17 @@ class StartScene(Scene):
         imageFiles : dict = {
              "Start Button" : 'src/assets/ResizedStartButtonPlaceholder.png',
              "Quit Button" : 'src/assets/QuitButtonPlaceholder.png',
-             "Logo" : 'src/assets/Tic-TacTetrisLogoPlaceholder.png'
+             "Logo" : 'src/assets/Tic-TacTetrisLogoPlaceholder.png',
+             "Mission Button" : 'src/assets/MissionButtonPlaceholder.png',
+             "Endless Button" : 'src/assets/EndlessButtonPlaceholder.png',
         }
 
         imageData : dict = { #(x, y, scale)
              "Start Button" : (50, 300, 6),
              "Quit Button" : (50, 400, 6),
-             "Logo" : (250, 50, 10) # Add center function later
+             "Logo" : (250, 50, 10), # Add center function later
+             "Mission Button" : (50, 500, 1),
+             "Endless Button" : (50, 600, 1),
         }
         
         self.imageButtons : dict = {}
@@ -48,14 +52,31 @@ class StartScene(Scene):
                   button.display()
 
     def update(self):
-        startButton : ImageButton = self.imageButtons.get("Start Button")
-        quitButton : ImageButton = self.imageButtons.get("Quit Button")
+     # Rendering
+     self.SCREEN.fill("blue")
+     imageButtons = self.imageButtons
+     for button in imageButtons.values():
+          if len(imageButtons) > 0:
+               button : ImageButton
+               button.display()
 
-        if startButton.is_clicked():
-            EventManager.changeScene(self, "testScene")
+     # Button functionality
+     startButton : ImageButton = self.imageButtons.get("Start Button") 
+     quitButton : ImageButton = self.imageButtons.get("Quit Button")
+     missionButton : ImageButton = self.imageButtons.get("Mission Button")
+     endlessButton : ImageButton = self.imageButtons.get("Endless Button")
 
-        if quitButton.is_clicked():
-            EventManager.quitGame()
+     if startButton.is_clicked():
+          EventManager.changeScene(self, "testScene")
+
+     if missionButton.is_clicked():
+          EventManager.changeScene(self, "missionTestScene")
+
+     if endlessButton.is_clicked():
+          EventManager.changeScene(self, "endlessTestScene")
+     
+     if quitButton.is_clicked():
+          EventManager.quitGame()
 
     def exit(self):
         self.SCREEN.fill("white")

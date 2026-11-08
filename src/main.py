@@ -2,9 +2,10 @@ import pygame
 
 from elements.sceneManager import SceneManager
 from elements.eventManager import EventManager
+from elements.config import Config
 
-SIZE = (850, 500)
-FPS = 25
+SIZE = (850, 700)
+FPS = Config.FPS
 STARTING_SCENE = "startScene"
 
 
