@@ -14,7 +14,7 @@ import random
 
 from elements.gameLogic.board import Board
 from elements.gameLogic.piece import Piece, PIECE_SHAPES
-from elements.missionData.mission_data import MISSION_FIELD
+from elements.missionData.mission_data import MISSION_FIELD, HARD_MISSION_FIELD
 
 
 class Game:
@@ -35,7 +35,7 @@ class Game:
         self.board = None
         self.current_piece = None
 
-    def reset(self, height, width, is_mission=False):
+    def reset(self, height, width, mission_board, is_mission=False):
         """
         Starts a fresh round. Deliberately keeps high_score across
         resets, matching the original game's behavior (HighScore
@@ -44,7 +44,11 @@ class Game:
         self.height = height
         self.width = width
         self.is_mission = is_mission
-        initial_grid = MISSION_FIELD if is_mission else None
+        if mission_board == 0:
+            active_board = MISSION_FIELD
+        if mission_board == 1:
+            active_board = HARD_MISSION_FIELD
+        initial_grid = active_board if is_mission else None
         self.board = Board(height, width, initial_grid)
         self.score = 0
         self.state = "start"
@@ -82,7 +86,7 @@ class Game:
         self.current_piece.move(0, 1)
         if self.board.intersects(self.current_piece):
             self.current_piece.move(0, -1)
-            self._lock_and_advance()
+            self._lock_and_advance(17)
 
     def hard_drop(self):
         """Drop the current piece straight to the floor and lock it."""
@@ -91,9 +95,9 @@ class Game:
         while not self.board.intersects(self.current_piece):
             self.current_piece.move(0, 1)
         self.current_piece.move(0, -1)
-        self._lock_and_advance()
+        self._lock_and_advance(17)
 
-    def _lock_and_advance(self):
+    def _lock_and_advance(self, handicap):
         assert self.board is not None and self.current_piece is not None, \
             "_lock_and_advance() called before the game has started"
         self.board.lock_piece(self.current_piece)
@@ -108,7 +112,7 @@ class Game:
             self._save_high_score()
             self.state = "gameover"
 
-        if self.is_mission and self.board.grid[17] == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]:
+        if self.is_mission and self.board.grid[handicap] == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]:
             self._save_high_score()
             self.state = "gameover"
 
