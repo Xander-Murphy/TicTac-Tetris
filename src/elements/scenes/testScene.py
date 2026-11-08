@@ -21,7 +21,7 @@ class TestScene(Scene):
         if self.counter > 100000:
             self.counter = 0
 
-        if self.game.state == "start" and (self.counter % (self.FPS // 2) == 0 or self.ui.pressing_down):
+        if self.game.state == "start" and (self.counter % (self.PhysicsUpdate // 2) == 0 or self.ui.pressing_down):
             self.game.soft_drop()
 
         self.ui.handle_input(self.game, self.NAME)

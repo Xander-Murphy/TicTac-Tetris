@@ -8,6 +8,12 @@ that's the abstraction boundary.
 
 Like Board and Piece, Game has no pygame dependency, so all of this
 can be unit tested with no display attached.
+
+Refactoring todo:
+- Inputs call this and game decides what to do. 
+    - Games doesn't need to know about input
+    - Example: Input recieves a left press then call Game handle left input
+
 """
 
 import random

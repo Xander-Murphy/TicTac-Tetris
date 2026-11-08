@@ -25,8 +25,8 @@ PIECE_COLORS = {
     0: 7,  # cyan
     1: 4,  # red
     2: 3,  # green
-    3: 5,
-    4: 6,
+    3: 5,  # 
+    4: 6,  # 
     5: 2,  # purple
     6: 1,  # yellow
 }
