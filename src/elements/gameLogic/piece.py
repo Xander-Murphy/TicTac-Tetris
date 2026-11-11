@@ -8,6 +8,8 @@ PIECE_SHAPES holds each tetromino's rotation states as flattened 4x4
 grid indices (0-15), exactly as the original code did - only the name
 and location changed (it used to be the global `Figures` list).
 """
+import random
+
 
 PIECE_SHAPES = {
     0: [[1, 5, 9, 13], [4, 5, 6, 7]],
@@ -20,16 +22,17 @@ PIECE_SHAPES = {
 }
 
 # Index into the Colors palette (see ui.py) for each piece type -
-# ported directly from the old make_figure() if/elif chain.
-PIECE_COLORS = {
-    0: 7,  # cyan
-    1: 4,  # red
-    2: 3,  # green
-    3: 5,  # 
-    4: 6,  # 
-    5: 2,  # purple
-    6: 1,  # yellow
-}
+# ported directly from the old make_figure() if/elif chain
+# No longer needed because colors are randomized
+# PIECE_COLORS = {
+#     0: 7,  # cyan
+#     1: 4,  # red
+#     2: 3,  # green
+#     3: 5,  # 
+#     4: 6,  # 
+#     5: 2,  # purple
+#     6: 1,  # yellow
+# }
 
 
 class Piece:
@@ -38,10 +41,11 @@ class Piece:
         self.x = x
         self.y = y
         self.rotation = 0
+        self._color = random.randint(1, 7) # There are only 7 colors available rn
 
     @property
     def color(self):
-        return PIECE_COLORS[self.type]
+        return self._color
 
     def image(self):
         """The flattened 4x4 shape for this piece's current rotation."""

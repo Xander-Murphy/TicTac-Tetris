@@ -26,8 +26,8 @@ class StartScene(Scene):
              "Start Button" : (50, 300, 6),
              "Quit Button" : (50, 400, 6),
              "Logo" : (250, 50, 10), # Add center function later
-             "Mission Button" : (50, 500, 1),
-             "Endless Button" : (50, 600, 1),
+             "Mission Button" : (300, 300, 3),
+             "Endless Button" : (300, 400, 2),
         }
         
         self.imageButtons : dict = {}
