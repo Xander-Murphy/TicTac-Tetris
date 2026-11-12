@@ -33,17 +33,23 @@ class UIMenu:
         self.zoom = zoom
         self.font = pygame.font.SysFont("Calibri", 25, True, False)
         self.pressing_down = False  # tracked here since it's input state, not game state
+        self.mission_selected = 0
 
     # -- Drawing -----------------------------------------------------
 
-    def draw_board(self, board):
+    def draw_board(self, board, is_mission):
         self.screen.fill(WHITE)
         x, y, zoom = self.start_x, self.start_y, self.zoom
         for i in range(board.height):
             for j in range(board.width):
-                pygame.draw.rect(
-                    self.screen, GRAY, [x + zoom * j, y + zoom * i, zoom, zoom], 1
-                )
+                if i == 17 and is_mission:
+                    pygame.draw.rect(
+                        self.screen, (255,0,0), [x + zoom * j, y + zoom * i, zoom, zoom], 1
+                    )
+                else:
+                    pygame.draw.rect(
+                        self.screen, GRAY, [x + zoom * j, y + zoom * i, zoom, zoom], 1
+                    )
                 if board.is_cell_occupied(i, j):
                     pygame.draw.rect(
                         self.screen,
@@ -78,6 +84,7 @@ class UIMenu:
             "Press Q to quit",
             "Press S for endless mode",
             "Press M for mission mode",
+            "Mission board: " + str(self.mission_selected)
         ]
         for offset, line in enumerate(lines):
             text = self.font.render(line, True, (255, 215, 0))
@@ -124,9 +131,15 @@ class UIMenu:
         if event.key == pygame.K_q:
             return True
         elif event.key == pygame.K_s:
-            game.reset(20, 10, is_mission=False)
+            game.reset(20, 10, self.mission_selected, is_mission=False)
             self.pressing_down = False
         elif event.key == pygame.K_m:
-            game.reset(20, 10, is_mission=True)
+            game.reset(20, 10, self.mission_selected, is_mission=True)
             self.pressing_down = False
+        elif event.key == pygame.K_RIGHT:
+            self.screen.fill(WHITE)
+            self.mission_selected = 1
+        elif event.key == pygame.K_LEFT:
+            self.screen.fill(WHITE)
+            self.mission_selected = 0
         return False

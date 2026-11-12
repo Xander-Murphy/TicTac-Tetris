@@ -26,7 +26,7 @@ class TestScene(Scene):
         self.ui.handle_input(self.game)
 
         if self.game.state == "start":
-            self.ui.draw_board(self.game.board)
+            self.ui.draw_board(self.game.board, self.game.is_mission)
             self.ui.draw_piece(self.game.current_piece)
 
         self.ui.draw_hud(self.game.score, self.game.high_score)
