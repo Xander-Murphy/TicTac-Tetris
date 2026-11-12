@@ -1,7 +1,7 @@
 import pygame
 from .scene import Scene
 from ..gameLogic.game import Game
-from ..UI.gameUI import UIMenu
+from ..UI.gameUI import GameUI
 from ..config import Config
 
 class MissionTestScene(Scene):
@@ -13,7 +13,7 @@ class MissionTestScene(Scene):
     def enter(self):
             self.counter : int = 0
             self.game = Game(20, 10)
-            self.ui = UIMenu(self.SCREEN)
+            self.ui = GameUI(self.SCREEN)
             self.FPS = Config.FPS
             self.game.reset(20, 10, True)
         

@@ -1,6 +1,7 @@
 import pygame
 
 class Texture:
+    @classmethod
     def getTileTexture(value : int):
         Colors = (
             (0, 0, 0),        # White
@@ -12,4 +13,9 @@ class Texture:
             (221, 164, 34),   # Orange
             (0, 240, 240),    # Cyan
         )
-        
+
+    @classmethod
+    def getCellTexture(cls, surface : pygame.Surface, value : int):
+        color = cls.getTileTexture(value)
+        new_surface = surface.fill(color)
+        return new_surface

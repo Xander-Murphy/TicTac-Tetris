@@ -10,6 +10,9 @@ import pygame
 from ..eventManager import EventManager
 from ..gameLogic.game import Game
 from ..gameLogic.cell import Cell
+from ..gameLogic.board import Board
+from ..config import Config
+from .textures import Texture
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -27,37 +30,87 @@ Colors = (
 )
 
 
-class UIMenu:
-    def __init__(self, screen, start_x=100, start_y=60, zoom=20):
+class GameUI:
+    def __init__(self, screen, board_size=(200,500), score_data_size=(100,50)):
         self.screen = screen
-        self.start_x = start_x
-        self.start_y = start_y
-        self.zoom = zoom
         self.font = pygame.font.SysFont("Calibri", 25, True, False)
         self.pressing_down = False  # tracked here since it's input state, not game state
+        self.UI_surface = pygame.Surface(Config.SCREEN_SIZE)
+        self.board_surface : pygame.Surface = pygame.Surface(board_size)
+        self.score_surface : pygame.surface = pygame.Surface(score_data_size)
 
     # -- Drawing -----------------------------------------------------
 
-    def draw_board(self, board):
-        self.screen.fill(WHITE)
-        x, y, zoom = self.start_x, self.start_y, self.zoom
-        for col in range(board.height):
-            for row in range(board.width):
-                # Outline of cell
-                pygame.draw.rect(
-                    self.screen, GRAY, [x + zoom * row, y + zoom * col, zoom, zoom], 1
-                )
+    def create_board_cell_surfaces(self, board : Board, cell_size : int):
+        cell_dimentions = (cell_size, cell_size)
+        cells = []
 
-                # Cell texture if filled with a piece
-                cell = board.grid[col][row]
-                if board.is_cell_occupied(cell):
-                    texture = cell.tileTexture
-                    pygame.draw.rect(
-                        self.screen,
-                        Colors[texture],
-                        [x + zoom * row + 1, y + zoom * col + 1, zoom - 2, zoom - 1],
-                    )
+        for row in range(board.height):
+            cell_row = []
+            
+            for col in range(board.width):
+                board_cell = pygame.Surface(cell_dimentions)
+                cell_row.append(board_cell)
+            
+            cells.append(cell_row)
+        
+        return cells
 
+    
+    def draw_board(self, board : Board):
+        board_surface = self.board_surface
+        board_size = board_surface.get_size()
+        cell_size = board_size // board.width
+        cell_surfaces = self.create_board_cell_surfaces(board, cell_size)
+
+        # Background of board
+        board_surface.fill(WHITE)
+        
+        # Center the board
+        x = (Config.SCREEN_SIZE[0] // 2) - (board_size[0] // 2)
+        y = (Config.SCREEN_SIZE[1] // 2) - (board_size[1] // 2)
+
+        # Draw lines
+        # Draw vertical lines
+        for col in range(1, board.width):
+            line_x = col * cell_size
+            pygame.draw.line(
+                board_surface,
+                BLACK,
+                (line_x, 0),
+                (line_x, board_size[1]),
+                2
+            )
+
+        # Draw horizontal lines
+        for row in range(1, board.height):
+            line_y = row * cell_size
+            pygame.draw.line(
+                board_surface,
+                BLACK,
+                (0, line_y),
+                (board_size[0], line_y),
+                2
+            )
+
+        # Draw Cells
+        for row_index, row in enumerate(cell_surfaces):
+            for col_index, cell_surface in enumerate(row):
+                
+                # Get the texture value from the cell on the board
+                board_cell : Cell = board.get_cell(row_index, col_index)
+                cell_texture_value = board_cell.tileTexture
+                
+                # Get the drawn surface from the value
+                cell_surface = Texture.getCellTexture(cell_surface, cell_texture_value)
+                
+                # Put the cell surface on the board surface
+                board_surface.blit(cell_surface, (col_index*cell_size, row_index*cell_size))
+        
+
+    
+        
+    
     def draw_piece(self, piece):
         x, y, zoom = self.start_x, self.start_y, self.zoom
         for i in range(4):

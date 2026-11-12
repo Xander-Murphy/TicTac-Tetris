@@ -4,7 +4,7 @@ from elements.sceneManager import SceneManager
 from elements.eventManager import EventManager
 from elements.config import Config
 
-SIZE = (850, 700)
+SIZE = Config.SCREEN_SIZE
 FPS = Config.FPS
 STARTING_SCENE = "startScene"
 
