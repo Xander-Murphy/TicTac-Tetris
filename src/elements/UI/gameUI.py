@@ -18,29 +18,26 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 
-Colors = (
-    (0, 0, 0),        # White
-    (241, 239, 47),   # Yellow
-    (136, 44, 237),   # Purple
-    (138, 234, 40),   # Green
-    (207, 54, 22),    # Red
-    (0, 0, 240),      # Blue
-    (221, 164, 34),   # Orange
-    (0, 240, 240),    # Cyan
-)
-
-
 class GameUI:
-    def __init__(self, screen, board_size=(200,500), score_data_size=(100,50)):
-        self.screen = screen
+    def __init__(self, screen, cell_size = 20,score_data_size=(100,50)):
+        self.screen : pygame.Surface = screen
         self.font = pygame.font.SysFont("Calibri", 25, True, False)
         self.pressing_down = False  # tracked here since it's input state, not game state
         self.UI_surface = pygame.Surface(Config.SCREEN_SIZE)
-        self.board_surface : pygame.Surface = pygame.Surface(board_size)
+        self.cell_size = cell_size
+        self.is_board_initialized = False
         self.score_surface : pygame.surface = pygame.Surface(score_data_size)
 
     # -- Drawing -----------------------------------------------------
 
+    def initialize_board(self, board : Board):
+        board_size = (
+            self.cell_size * board.width,
+            self.cell_size * board.height,
+        )
+        self.board_surface : pygame.Surface = pygame.Surface(board_size)
+        self.is_board_initialized = True
+    
     def create_board_cell_surfaces(self, board : Board, cell_size : int):
         cell_dimentions = (cell_size, cell_size)
         cells = []
@@ -58,9 +55,12 @@ class GameUI:
 
     
     def draw_board(self, board : Board):
+        if not self.is_board_initialized:
+            self.initialize_board(board)
+
         board_surface = self.board_surface
         board_size = board_surface.get_size()
-        cell_size = board_size // board.width
+        cell_size = self.cell_size
         cell_surfaces = self.create_board_cell_surfaces(board, cell_size)
 
         # Background of board
@@ -79,7 +79,7 @@ class GameUI:
                 BLACK,
                 (line_x, 0),
                 (line_x, board_size[1]),
-                2
+                1
             )
 
         # Draw horizontal lines
@@ -90,7 +90,7 @@ class GameUI:
                 BLACK,
                 (0, line_y),
                 (board_size[0], line_y),
-                2
+                1
             )
 
         # Draw Cells
@@ -101,31 +101,40 @@ class GameUI:
                 board_cell : Cell = board.get_cell(row_index, col_index)
                 cell_texture_value = board_cell.tileTexture
                 
-                # Get the drawn surface from the value
-                cell_surface = Texture.getCellTexture(cell_surface, cell_texture_value)
+                # Set the surface of the cell to the texture given the value
+                Texture.setCellTexture(cell_surface, cell_texture_value)
                 
                 # Put the cell surface on the board surface
                 board_surface.blit(cell_surface, (col_index*cell_size, row_index*cell_size))
+
+        self.screen.blit(board_surface, (x, y))
         
 
     
         
     
-    def draw_piece(self, piece):
-        x, y, zoom = self.start_x, self.start_y, self.zoom
+    def draw_piece(self, piece, board: Board):
+        board_size = self.board_surface.get_size()
+        cell_size = self.cell_size
+        color = Texture.getTileTexture(piece.color)
+
         for i in range(4):
             for j in range(4):
                 if i * 4 + j in piece.image():
                     pygame.draw.rect(
-                        self.screen,
-                        Colors[piece.color],
+                        self.board_surface,
+                        color,
                         [
-                            x + zoom * (piece.x + j) + 1,
-                            y + zoom * (piece.y + i) + 1,
-                            zoom - 2,
-                            zoom - 2,
+                            cell_size * (piece.x + j) + 1,
+                            cell_size * (piece.y + i) + 1,
+                            cell_size - 2,
+                            cell_size - 2,
                         ],
                     )
+
+        x = (Config.SCREEN_SIZE[0] - board_size[0]) // 2
+        y = (Config.SCREEN_SIZE[1] - board_size[1]) // 2
+        self.screen.blit(self.board_surface, (x, y))
 
     def draw_hud(self, score, high_score):
         text = self.font.render(f"Score: {score}", True, BLACK)

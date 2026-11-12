@@ -30,7 +30,7 @@ class MissionTestScene(Scene):
 
         if self.game.state == "start":
             self.ui.draw_board(self.game.board)
-            self.ui.draw_piece(self.game.current_piece)
+            self.ui.draw_piece(self.game.current_piece, self.game.board)
 
         self.ui.draw_hud(self.game.score, self.game.high_score)
 
