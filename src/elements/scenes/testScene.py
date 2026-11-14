@@ -27,10 +27,7 @@ class TestScene(Scene):
         self.ui.handle_input(self.game, self.NAME)
 
         if self.game.state == "start":
-            self.ui.draw_board(self.game.board)
-            self.ui.draw_piece(self.game.current_piece, self.game.board)
-
-        self.ui.draw_hud(self.game.score, self.game.high_score)
+            self.ui.update_UI(self.game.board, self.game.current_piece, self.game.score, self.game.high_score)
 
         if self.game.state == "gameover":
             self.ui.draw_game_over_screen()

@@ -6,6 +6,8 @@ itself. That split is what makes Board/Piece/Game testable without a
 display attached.
 """
 
+# Think about text class for handling rendered text
+
 import pygame
 from ..eventManager import EventManager
 from ..gameLogic.game import Game
@@ -13,30 +15,60 @@ from ..gameLogic.cell import Cell
 from ..gameLogic.board import Board
 from ..config import Config
 from .textures import Texture
+from .dataDisplay import DataDisplay
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
 
 class GameUI:
-    def __init__(self, screen, cell_size = 20,score_data_size=(100,50)):
+    def __init__(self, screen, cell_size = 30,score_data_size=(100,50)):
         self.screen : pygame.Surface = screen
         self.font = pygame.font.SysFont("Calibri", 25, True, False)
         self.pressing_down = False  # tracked here since it's input state, not game state
         self.UI_surface = pygame.Surface(Config.SCREEN_SIZE)
         self.cell_size = cell_size
         self.is_board_initialized = False
-        self.score_surface : pygame.surface = pygame.Surface(score_data_size)
+        self.score_data_size = score_data_size
+        self.is_data_displays_initialized = False
 
     # -- Drawing -----------------------------------------------------
 
+    def update_UI(self, board : Board, piece, score, high_score):
+        self.UI_surface.fill(WHITE)
+        self.draw_board(board)
+        self.draw_piece(piece, board)
+        self.draw_hud(score, high_score)
+    
     def initialize_board(self, board : Board):
-        board_size = (
+        self.board_size = (
             self.cell_size * board.width,
             self.cell_size * board.height,
         )
-        self.board_surface : pygame.Surface = pygame.Surface(board_size)
+        self.board_position = (
+            (Config.SCREEN_SIZE[0] - self.board_size[0]) // 2,
+            (Config.SCREEN_SIZE[1] - self.board_size[1]) // 2,
+        )
+        self.board_surface : pygame.Surface = pygame.Surface(self.board_size)
         self.is_board_initialized = True
+        self.initialize_data_displays()
+
+    def initialize_data_displays(self):
+        score_size = (
+            max(self.score_data_size[0], self.screen.get_width()),
+            self.score_data_size[1],
+        )
+        self.score_data_display = DataDisplay(score_size, (0, 0))
+
+        next_piece_size = self.board_size[1] // 3
+        self.next_piece_data_display = DataDisplay(
+            (next_piece_size, next_piece_size),
+            (
+                self.board_position[0] + self.board_size[0] + self.cell_size,
+                self.board_position[1],
+            ),
+        )
+        self.is_data_displays_initialized = True
     
     def create_board_cell_surfaces(self, board : Board, cell_size : int):
         cell_dimentions = (cell_size, cell_size)
@@ -53,7 +85,6 @@ class GameUI:
         
         return cells
 
-    
     def draw_board(self, board : Board):
         if not self.is_board_initialized:
             self.initialize_board(board)
@@ -66,10 +97,6 @@ class GameUI:
         # Background of board
         board_surface.fill(WHITE)
         
-        # Center the board
-        x = (Config.SCREEN_SIZE[0] // 2) - (board_size[0] // 2)
-        y = (Config.SCREEN_SIZE[1] // 2) - (board_size[1] // 2)
-
         # Draw lines
         # Draw vertical lines
         for col in range(1, board.width):
@@ -107,14 +134,9 @@ class GameUI:
                 # Put the cell surface on the board surface
                 board_surface.blit(cell_surface, (col_index*cell_size, row_index*cell_size))
 
-        self.screen.blit(board_surface, (x, y))
+        self.screen.blit(board_surface, self.board_position)
         
-
-    
-        
-    
     def draw_piece(self, piece, board: Board):
-        board_size = self.board_surface.get_size()
         cell_size = self.cell_size
         color = Texture.getTileTexture(piece.color)
 
@@ -132,17 +154,22 @@ class GameUI:
                         ],
                     )
 
-        x = (Config.SCREEN_SIZE[0] - board_size[0]) // 2
-        y = (Config.SCREEN_SIZE[1] - board_size[1]) // 2
-        self.screen.blit(self.board_surface, (x, y))
+        self.screen.blit(self.board_surface, self.board_position)
 
     def draw_hud(self, score, high_score):
+        if not self.is_data_displays_initialized:
+            raise RuntimeError("The board must be initialized before drawing the HUD")
+
+        self.score_data_display.clear()
         text = self.font.render(f"Score: {score}", True, BLACK)
-        self.screen.blit(text, [0, 0])
+        self.score_data_display.add_surface(text, (0, 0))
         text_hi = self.font.render(f"High Score: {high_score}", True, BLACK)
-        self.screen.blit(text_hi, [0, 24])
+        self.score_data_display.add_surface(text_hi, (0, 24))
+        self.score_data_display.display(self.screen)
+        self.next_piece_data_display.display(self.screen)
 
     def draw_game_over_screen(self):
+        print("game over")
         lines = [
             "Press Q to quit",
             "Press R to restart",
