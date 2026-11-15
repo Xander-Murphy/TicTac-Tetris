@@ -1,8 +1,11 @@
 import pygame
-from .scenes import scene
+from elements.scenes.scene import Scene
+from .eventManager import EventManager
 from elements.scenes.testScene import TestScene
 from elements.scenes.errorScene import ErrorScene
 from elements.scenes.startScene import StartScene
+from elements.scenes.missionTestScene import MissionTestScene
+from elements.scenes.endlessTestScene import EndlessTestScene
 
 class SceneManager:
     def __init__(self, initScene : str, screen: pygame.Surface):
@@ -12,14 +15,20 @@ class SceneManager:
         self.all_scenes = [
             TestScene(self.SCREEN, "testScene"),
             ErrorScene(self.SCREEN, "errorScene"),
-            StartScene(self.SCREEN, "startScene")
+            StartScene(self.SCREEN, "startScene"),
+            MissionTestScene(self.SCREEN, "missionTestScene"),
+            EndlessTestScene(self.SCREEN, "endlessTestScene")
         ]
+        # Dict with SceneName : SceneObject
         self.SCENES = self.get_all_scenes()
 
+        # Add change scene to event manager
+        EventManager.onSceneChange.append(self.change_scene)
+        
         # start the init scene
         if initScene not in self.SCENES:
             raise KeyError("Initial scene could not be found")
-        self.CURRENT_SCENE : scene = self.SCENES[initScene]
+        self.CURRENT_SCENE : Scene = self.SCENES[initScene]
 
         self.CURRENT_SCENE.enter()
 
@@ -37,18 +46,21 @@ class SceneManager:
         if new_scene is None:
             raise KeyError("New Scene could not be found")
 
-        if current_scene != self.CURRENT_SCENE:
-            raise KeyError("Current scene does not match")
+        if isinstance(current_scene, Scene):
+            if current_scene != self.CURRENT_SCENE:
+                raise KeyError("Current scene does not match")
+        elif isinstance(current_scene, str):
+            current_scene = self.SCENES.get(current_scene)
+            if current_scene != self.CURRENT_SCENE:
+                raise KeyError("Current scene does not match or can't be found")
+        else:
+            raise KeyError("Current scene but pass in Scene object or String name")
         
         self.CURRENT_SCENE.exit()
         self.CURRENT_SCENE = new_scene
         self.CURRENT_SCENE.enter()
 
     def update(self):
-        for event in self.CURRENT_SCENE.EVENTS:
-            if event[0] == "change_scene":
-                self.change_scene(event[1], event[2])
-        
         self.CURRENT_SCENE.update()
 
         # EXAMPLE - self.EVENTS.append(("change_scene", self, "testScene"))

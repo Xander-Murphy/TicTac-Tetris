@@ -2,9 +2,10 @@ import pygame
 
 from elements.sceneManager import SceneManager
 from elements.eventManager import EventManager
+from elements.config import Config
 
-SIZE = (850, 500)
-FPS = 25
+SIZE = Config.SCREEN_SIZE
+FPS = Config.FPS
 STARTING_SCENE = "startScene"
 
 
@@ -26,6 +27,7 @@ def main():
 
     while not done:
 
+        # Look at events without clearing the event queue
         if pygame.event.peek(pygame.QUIT):
             stopPygame()
 

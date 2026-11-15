@@ -19,14 +19,15 @@ PIECE_SHAPES = {
     6: [[1, 2, 5, 6]],
 }
 
-# Index into the Colors palette (see ui.py) for each piece type -
-# ported directly from the old make_figure() if/elif chain.
+# Index into the tile palette (see UI/textures.py) for each piece type -
+# ported directly from the old make_figure() if/elif chain. Each shape
+# always has the same color.
 PIECE_COLORS = {
     0: 7,  # cyan
     1: 4,  # red
     2: 3,  # green
-    3: 5,
-    4: 6,
+    3: 5,  # blue
+    4: 6,  # orange
     5: 2,  # purple
     6: 1,  # yellow
 }

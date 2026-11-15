@@ -50,3 +50,10 @@ HARD_MISSION_FIELD = [
     [6, 6, 6, 6, 6, 6, 6, 6, 6, 0],
     [6, 6, 6, 6, 6, 6, 6, 6, 6, 0],
 ]
+
+# Every selectable mission layout, in the order the player cycles through
+# them. Add a new layout above and append it here - no logic changes needed.
+MISSION_BOARDS = (MISSION_FIELD, HARD_MISSION_FIELD)
+
+# Mission goal: the game ends once this row has been fully cleared out.
+MISSION_GOAL_ROW = 17

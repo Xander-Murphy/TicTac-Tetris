@@ -8,13 +8,19 @@ that's the abstraction boundary.
 
 Like Board and Piece, Game has no pygame dependency, so all of this
 can be unit tested with no display attached.
+
+Refactoring todo:
+- Inputs call this and game decides what to do. 
+    - Games doesn't need to know about input
+    - Example: Input recieves a left press then call Game handle left input
+
 """
 
 import random
 
 from elements.gameLogic.board import Board
 from elements.gameLogic.piece import Piece, PIECE_SHAPES
-from elements.missionData.mission_data import MISSION_FIELD, HARD_MISSION_FIELD
+from elements.missionData.mission_data import MISSION_BOARDS, MISSION_GOAL_ROW
 
 
 class Game:
@@ -32,27 +38,33 @@ class Game:
         self.high_score = 0
         self.state = "gameover"
         self.is_mission = False
+        self.mission_board = 0
         self.board = None
         self.current_piece = None
 
-    def reset(self, height, width, mission_board, is_mission=False):
+    def reset(self, height, width, is_mission=False, mission_board=0):
         """
         Starts a fresh round. Deliberately keeps high_score across
         resets, matching the original game's behavior (HighScore
         persisted across restarts, only Score reset to 0).
+
+        `mission_board` indexes MISSION_BOARDS and is only used when
+        `is_mission` is True. Out-of-range values wrap around.
         """
         self.height = height
         self.width = width
         self.is_mission = is_mission
-        if mission_board == 0:
-            active_board = MISSION_FIELD
-        if mission_board == 1:
-            active_board = HARD_MISSION_FIELD
-        initial_grid = active_board if is_mission else None
+        self.mission_board = mission_board % len(MISSION_BOARDS)
+        initial_grid = MISSION_BOARDS[self.mission_board] if is_mission else None
         self.board = Board(height, width, initial_grid)
         self.score = 0
         self.state = "start"
         self.spawn_piece()
+
+    @property
+    def goal_row(self):
+        """The row a mission must clear to finish, or None in endless mode."""
+        return MISSION_GOAL_ROW if self.is_mission else None
 
     def spawn_piece(self):
         piece_type = random.randint(0, len(PIECE_SHAPES) - 1)
@@ -86,7 +98,7 @@ class Game:
         self.current_piece.move(0, 1)
         if self.board.intersects(self.current_piece):
             self.current_piece.move(0, -1)
-            self._lock_and_advance(17)
+            self._lock_and_advance()
 
     def hard_drop(self):
         """Drop the current piece straight to the floor and lock it."""
@@ -95,9 +107,9 @@ class Game:
         while not self.board.intersects(self.current_piece):
             self.current_piece.move(0, 1)
         self.current_piece.move(0, -1)
-        self._lock_and_advance(17)
+        self._lock_and_advance()
 
-    def _lock_and_advance(self, handicap):
+    def _lock_and_advance(self):
         assert self.board is not None and self.current_piece is not None, \
             "_lock_and_advance() called before the game has started"
         self.board.lock_piece(self.current_piece)
@@ -112,7 +124,7 @@ class Game:
             self._save_high_score()
             self.state = "gameover"
 
-        if self.is_mission and self.board.grid[handicap] == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]:
+        if self.is_mission and self.board.is_row_empty(self.goal_row):
             self._save_high_score()
             self.state = "gameover"
 
