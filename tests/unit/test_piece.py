@@ -19,6 +19,23 @@ def test_piece_color_matches_its_type():
         assert piece.color == expected_color
 
 
+def test_same_piece_type_always_gets_the_same_color():
+    """Guards against piece colors being randomized again."""
+    for piece_type in PIECE_SHAPES:
+        colors = {Piece(piece_type=piece_type, x=0, y=0).color for _ in range(50)}
+        assert len(colors) == 1
+
+
+def test_every_piece_type_has_its_own_color():
+    assert set(PIECE_COLORS) == set(PIECE_SHAPES)
+    assert len(set(PIECE_COLORS.values())) == len(PIECE_COLORS)
+
+
+def test_piece_colors_are_real_tile_colors_not_the_empty_tile():
+    for color in PIECE_COLORS.values():
+        assert 1 <= color <= 7  # 0 is the empty-cell texture in textures.py
+
+
 def test_piece_image_returns_current_rotations_shape():
     piece = Piece(piece_type=0, x=0, y=0)
     assert piece.image() == PIECE_SHAPES[0][0]

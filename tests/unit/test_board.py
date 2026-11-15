@@ -5,10 +5,17 @@ Board has no pygame dependency, so these tests need no display and run
 fast. Where a test needs a "piece", we use the real Piece class rather
 than a hand-rolled fake - Board.intersects()/lock_piece() only need an
 object with .x, .y, .image() and .color, which Piece already is.
+
+Boards are described as rows of ints via grid_helpers (0 = empty,
+anything else = filled with that tile color).
 """
 
+import pytest
+
 from elements.gameLogic.board import Board
+from elements.gameLogic.cell import Cell, CellStatus
 from elements.gameLogic.piece import Piece
+from grid_helpers import board_from_rows, grid_values, is_filled
 
 
 # A simple 2x2 square piece (Type 6, rotation 0) is used throughout as
@@ -22,13 +29,31 @@ def square_piece(x, y):
 # construction
 # ---------------------------------------------------------------------
 
-def test_empty_board_has_correct_dimensions_and_all_zero_cells():
+def test_empty_board_has_correct_dimensions_and_all_empty_cells():
     board = Board(height=5, width=4)
     assert board.height == 5
     assert board.width == 4
     assert len(board.grid) == 5
     assert all(len(row) == 4 for row in board.grid)
-    assert all(cell == 0 for row in board.grid for cell in row)
+    assert grid_values(board) == [[0] * 4 for _ in range(5)]
+
+
+def test_every_cell_knows_its_own_position():
+    board = Board(height=3, width=2)
+    for row_index, row in enumerate(board.grid):
+        for col_index, cell in enumerate(row):
+            assert (cell.row, cell.column) == (row_index, col_index)
+
+
+def test_initial_grid_fills_cells_with_their_tile_color():
+    rows = [
+        [0, 3],
+        [7, 0],
+    ]
+    board = board_from_rows(rows)
+    assert grid_values(board) == rows
+    assert board.get_cell(0, 1).status is CellStatus.FILLED
+    assert board.get_cell(0, 0).status is CellStatus.EMPTY
 
 
 def test_board_with_initial_grid_copies_rather_than_aliases():
@@ -40,15 +65,46 @@ def test_board_with_initial_grid_copies_rather_than_aliases():
     """
     original = [[0, 0], [0, 0]]
     board = Board(height=2, width=2, initial_grid=original)
-    board.grid[0][0] = 9
-    assert original[0][0] == 0  # original untouched
+    board.lock_piece(square_piece(x=-1, y=0))  # fills the whole 2x2 board
+    assert original == [[0, 0], [0, 0]]  # original untouched
+
+
+def test_two_boards_from_the_same_layout_do_not_share_cells():
+    rows = [[0, 1], [1, 1]]
+    first, second = board_from_rows(rows), board_from_rows(rows)
+    first.get_cell(0, 0).status = CellStatus.FILLED
+    assert not is_filled(second, 0, 0)
 
 
 def test_is_cell_occupied():
     board = Board(height=2, width=2)
-    assert board.is_cell_occupied(0, 0) is False
-    board.grid[0][0] = 3
-    assert board.is_cell_occupied(0, 0) is True
+    cell = board.get_cell(0, 0)
+    assert board.is_cell_occupied(cell) is False
+    cell.status = CellStatus.FILLED
+    assert board.is_cell_occupied(cell) is True
+
+
+def test_preview_cells_do_not_count_as_occupied():
+    board = Board(height=1, width=1)
+    cell = board.get_cell(0, 0)
+    cell.status = CellStatus.PREVIEW
+    assert board.is_cell_occupied(cell) is False
+
+
+def test_get_cell_returns_the_cell_at_row_and_column():
+    board = Board(height=3, width=3)
+    cell = board.get_cell(2, 1)
+    assert isinstance(cell, Cell)
+    assert cell is board.grid[2][1]
+
+
+@pytest.mark.parametrize("rows, row, expected", [
+    ([[0, 0, 0], [0, 0, 0]], 1, True),
+    ([[0, 0, 0], [0, 5, 0]], 1, False),
+    ([[4, 4, 4], [0, 0, 0]], 1, True),  # other rows don't matter
+])
+def test_is_row_empty(rows, row, expected):
+    assert board_from_rows(rows).is_row_empty(row) is expected
 
 
 # ---------------------------------------------------------------------
@@ -81,7 +137,7 @@ def test_intersects_true_past_bottom():
 
 def test_intersects_true_when_overlapping_filled_cell():
     board = Board(height=10, width=10)
-    board.grid[1][2] = 4  # occupy a cell the square piece would land on
+    board.get_cell(1, 2).status = CellStatus.FILLED  # a cell the square would land on
     piece = square_piece(x=0, y=0)
     assert board.intersects(piece) is True
 
@@ -91,16 +147,15 @@ def test_intersects_true_when_overlapping_filled_cell():
 # ---------------------------------------------------------------------
 
 def test_lock_piece_writes_the_pieces_color_into_the_grid():
-    board = Board(height=5, width=5)
+    board = Board(height=3, width=4)
     piece = square_piece(x=0, y=0)
     board.lock_piece(piece)
-    expected_color = piece.color
-    assert board.grid[0][1] == expected_color
-    assert board.grid[0][2] == expected_color
-    assert board.grid[1][1] == expected_color
-    assert board.grid[1][2] == expected_color
-    # cells outside the shape stay empty
-    assert board.grid[0][0] == 0
+    c = piece.color
+    assert grid_values(board) == [
+        [0, c, c, 0],
+        [0, c, c, 0],
+        [0, 0, 0, 0],
+    ]
 
 
 # ---------------------------------------------------------------------
@@ -108,56 +163,82 @@ def test_lock_piece_writes_the_pieces_color_into_the_grid():
 # ---------------------------------------------------------------------
 
 def test_clear_full_lines_clears_a_full_row_and_returns_count():
-    board = Board(height=4, width=3)
-    board.grid = [
+    board = board_from_rows([
         [0, 0, 0],
         [1, 0, 0],
-        [9, 9, 9],  # full row
+        [1, 2, 3],  # full row
         [0, 0, 0],
-    ]
+    ])
     lines_cleared = board.clear_full_lines()
     assert lines_cleared == 1
-    # row 1's contents should have shifted down into row 2
-    assert board.grid[2] == [1, 0, 0]
+    assert grid_values(board) == [
+        [0, 0, 0],
+        [0, 0, 0],
+        [1, 0, 0],  # row 1 shifted down into row 2
+        [0, 0, 0],
+    ]
 
 
 def test_clear_full_lines_does_nothing_when_no_row_is_full():
-    board = Board(height=4, width=3)
-    original = [
+    rows = [
         [0, 0, 0],
-        [9, 9, 0],  # one empty cell - not full
+        [7, 7, 0],  # one empty cell - not full
         [1, 0, 0],
         [0, 0, 0],
     ]
-    board.grid = [row[:] for row in original]
-    lines_cleared = board.clear_full_lines()
-    assert lines_cleared == 0
-    assert board.grid == original
+    board = board_from_rows(rows)
+    assert board.clear_full_lines() == 0
+    assert grid_values(board) == rows
 
 
-def test_clear_full_lines_row_index_1_quirk_is_preserved():
+def test_clear_full_lines_clears_rows_near_the_top_too():
     """
-    This documents a quirk ported from the original game: row index 1
-    is never actually overwritten by the shift-down logic (there's
-    nothing "above" it to copy from, since row 0 is never touched).
-    So a full row sitting exactly at index 1 still counts toward the
-    score, but visually stays in place instead of clearing. This test
-    exists so that if someone "fixes" this later, it's a deliberate,
-    visible decision rather than an accidental side effect.
+    The original game never cleared row 0 and left a full row 1 in
+    place (a quirk of its shift-down loop). PR #5 rewrote
+    clear_full_lines() and dropped that quirk on purpose, so a full row
+    anywhere on the board now clears.
     """
-    board = Board(height=3, width=3)
-    board.grid = [
+    board = board_from_rows([
         [0, 0, 0],
-        [9, 9, 9],  # full row, sitting at index 1
+        [7, 7, 7],  # full row, sitting at index 1
         [0, 0, 0],
-    ]
-    lines_cleared = board.clear_full_lines()
-    assert lines_cleared == 1
-    assert board.grid[1] == [9, 9, 9]  # unchanged, per the quirk above
+    ])
+    assert board.clear_full_lines() == 1
+    assert grid_values(board) == [[0, 0, 0]] * 3
+
+
+def test_clear_full_lines_clears_a_full_top_row():
+    board = board_from_rows([
+        [7, 7, 7],
+        [0, 1, 0],
+    ])
+    assert board.clear_full_lines() == 1
+    assert grid_values(board) == [[0, 0, 0], [0, 1, 0]]
 
 
 def test_clear_full_lines_clears_two_rows_at_once():
-    board = Board(height=5, width=3)
-    board.grid = [[0, 0, 0], [0, 0, 0], [2, 0, 0], [9, 9, 9], [8, 8, 8]]
+    board = board_from_rows([[0, 0, 0], [0, 0, 0], [2, 0, 0], [7, 7, 7], [6, 6, 6]])
     assert board.clear_full_lines() == 2
-    assert board.grid[4] == [2, 0, 0]
+    assert grid_values(board) == [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0], [2, 0, 0]]
+
+
+def test_clear_full_lines_handles_full_rows_that_are_not_next_to_each_other():
+    board = board_from_rows([
+        [0, 0, 3],
+        [7, 7, 7],
+        [4, 0, 0],
+        [6, 6, 6],
+    ])
+    assert board.clear_full_lines() == 2
+    assert grid_values(board) == [[0, 0, 0], [0, 0, 0], [0, 0, 3], [4, 0, 0]]
+
+
+def test_cells_keep_correct_positions_after_rows_shift_down():
+    board = board_from_rows([
+        [0, 5, 0],
+        [7, 7, 7],
+    ])
+    board.clear_full_lines()
+    for row_index, row in enumerate(board.grid):
+        for col_index, cell in enumerate(row):
+            assert (cell.row, cell.column) == (row_index, col_index)

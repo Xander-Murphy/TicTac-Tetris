@@ -13,7 +13,10 @@ import pytest
 
 from elements.gameLogic.game import Game
 from elements.gameLogic.piece import PIECE_SHAPES
-from elements.missionData.mission_data import MISSION_FIELD
+from elements.missionData.mission_data import (
+    HARD_MISSION_FIELD, MISSION_BOARDS, MISSION_FIELD, MISSION_GOAL_ROW,
+)
+from grid_helpers import board_from_rows, grid_values, is_filled
 
 
 def fixed_random(value):
@@ -46,7 +49,7 @@ def test_reset_starts_endless_mode_with_an_empty_board(monkeypatch):
     game.reset(20, 10, is_mission=False)
     assert game.state == "start"
     assert game.board is not None
-    assert all(cell == 0 for row in game.board.grid for cell in row)
+    assert all(game.board.is_row_empty(row) for row in range(20))
     assert game.current_piece is not None
 
 
@@ -55,7 +58,7 @@ def test_reset_mission_mode_loads_the_mission_field(monkeypatch):
     game = Game(20, 10)
     game.reset(20, 10, is_mission=True)
     assert game.state == "start"
-    assert game.board.grid == MISSION_FIELD
+    assert grid_values(game.board) == MISSION_FIELD
     # confirm it's a copy, not the same list, like test_board.py checks for Board directly
     assert game.board.grid is not MISSION_FIELD
 
@@ -145,7 +148,7 @@ def test_soft_drop_locks_the_piece_when_it_reaches_the_floor(monkeypatch):
     game.reset(2, 10, is_mission=False)
     game.soft_drop()
     # the piece should have locked into the board rather than falling further
-    assert game.board.grid[1][4] == game.board.grid[1][5] != 0
+    assert is_filled(game.board, 1, 4) and is_filled(game.board, 1, 5)
 
 
 def test_hard_drop_drops_straight_to_the_floor_and_locks(monkeypatch):
@@ -154,7 +157,7 @@ def test_hard_drop_drops_straight_to_the_floor_and_locks(monkeypatch):
     game.reset(5, 10, is_mission=False)
     game.hard_drop()
     # the O-piece's bottom row should have landed on the board's last row
-    assert game.board.grid[4][4] == game.board.grid[4][5] != 0
+    assert is_filled(game.board, 4, 4) and is_filled(game.board, 4, 5)
 
 
 def test_locking_a_piece_scores_points_for_cleared_lines(monkeypatch):
@@ -162,11 +165,11 @@ def test_locking_a_piece_scores_points_for_cleared_lines(monkeypatch):
     game = Game(3, 4)
     game.reset(3, 4, is_mission=False)
     # pre-fill the board so the O-piece's drop completes a full row
-    game.board.grid = [
+    game.board = board_from_rows([
         [0, 0, 0, 0],
         [0, 0, 0, 0],
-        [9, 9, 0, 0],  # missing the two columns the piece will fill
-    ]
+        [7, 7, 0, 0],  # missing the two columns the piece will fill
+    ])
     game.current_piece.x = 1
     game.current_piece.y = 1
     game.hard_drop()
@@ -178,7 +181,7 @@ def test_locking_updates_high_score_only_when_beaten(monkeypatch):
     game = Game(3, 4)
     game.reset(3, 4, is_mission=False)
     game.high_score = 5
-    game.board.grid = [[0, 0, 0, 0], [0, 0, 0, 0], [9, 9, 0, 0]]
+    game.board = board_from_rows([[0, 0, 0, 0], [0, 0, 0, 0], [7, 7, 0, 0]])
     game.current_piece.x = 1
     game.current_piece.y = 1
     game.hard_drop()
@@ -218,7 +221,7 @@ def test_clearing_two_lines_scores_four_and_raises_high_score(monkeypatch):
     monkeypatch.setattr(random, "randint", fixed_random(6))
     game = Game(4, 4)
     game.reset(4, 4, is_mission=False)
-    game.board.grid = [[0, 0, 0, 0], [0, 0, 0, 0], [9, 9, 0, 0], [9, 9, 0, 0]]
+    game.board = board_from_rows([[0, 0, 0, 0], [0, 0, 0, 0], [7, 7, 0, 0], [7, 7, 0, 0]])
     game.current_piece.x = 1  # O-piece fills columns 2 and 3
     game.hard_drop()
     assert game.score == 4
@@ -241,3 +244,103 @@ def test_playing_mission_mode_never_changes_mission_field(monkeypatch):
     game.reset(20, 10, is_mission=True)
     game.hard_drop()
     assert MISSION_FIELD == snapshot
+
+
+# ---------------------------------------------------------------------
+# mission boards
+# ---------------------------------------------------------------------
+
+@pytest.mark.parametrize("mission_board, layout", [
+    (0, MISSION_FIELD),
+    (1, HARD_MISSION_FIELD),
+])
+def test_reset_loads_the_chosen_mission_board(monkeypatch, mission_board, layout):
+    monkeypatch.setattr(random, "randint", fixed_random(0))
+    game = Game(20, 10)
+    game.reset(20, 10, is_mission=True, mission_board=mission_board)
+    assert game.mission_board == mission_board
+    assert grid_values(game.board) == layout
+
+
+def test_mission_board_out_of_range_wraps_around(monkeypatch):
+    monkeypatch.setattr(random, "randint", fixed_random(0))
+    game = Game(20, 10)
+    game.reset(20, 10, is_mission=True, mission_board=len(MISSION_BOARDS))
+    assert game.mission_board == 0
+    assert grid_values(game.board) == MISSION_FIELD
+
+
+def test_endless_mode_ignores_the_mission_board(monkeypatch):
+    monkeypatch.setattr(random, "randint", fixed_random(0))
+    game = Game(20, 10)
+    game.reset(20, 10, is_mission=False, mission_board=1)
+    assert all(game.board.is_row_empty(row) for row in range(20))
+
+
+def test_every_mission_board_fits_the_standard_board():
+    for layout in MISSION_BOARDS:
+        assert len(layout) == 20
+        assert all(len(row) == 10 for row in layout)
+
+
+def test_every_mission_board_starts_with_blocks_on_the_goal_row():
+    """Otherwise the mission would end the moment the first piece lands."""
+    for layout in MISSION_BOARDS:
+        assert any(value != 0 for value in layout[MISSION_GOAL_ROW])
+
+
+@pytest.mark.parametrize("is_mission, expected", [(True, MISSION_GOAL_ROW), (False, None)])
+def test_goal_row_only_exists_in_mission_mode(monkeypatch, is_mission, expected):
+    monkeypatch.setattr(random, "randint", fixed_random(0))
+    game = Game(20, 10)
+    game.reset(20, 10, is_mission=is_mission)
+    assert game.goal_row == expected
+
+
+def test_mission_ends_once_the_goal_row_is_cleared(monkeypatch):
+    monkeypatch.setattr(random, "randint", fixed_random(6))
+    game = Game(20, 10)
+    game.reset(20, 10, is_mission=True)
+    for cell in game.board.grid[MISSION_GOAL_ROW]:
+        cell.clear()
+    game.hard_drop()  # any lock checks the goal row
+    assert game.state == "gameover"
+
+
+def test_mission_keeps_going_while_the_goal_row_has_blocks(monkeypatch):
+    monkeypatch.setattr(random, "randint", fixed_random(6))
+    game = Game(20, 10)
+    game.reset(20, 10, is_mission=True)
+    game.hard_drop()
+    assert game.state == "start"
+
+
+def test_endless_mode_does_not_end_when_the_goal_row_is_empty(monkeypatch):
+    monkeypatch.setattr(random, "randint", fixed_random(6))
+    game = Game(20, 10)
+    game.reset(20, 10, is_mission=False)
+    game.hard_drop()
+    assert game.board.is_row_empty(MISSION_GOAL_ROW)
+    assert game.state == "start"
+
+
+# ---------------------------------------------------------------------
+# high score file (tests run in a temp folder - see conftest.py)
+# ---------------------------------------------------------------------
+
+def test_game_over_saves_the_high_score_to_score_txt(monkeypatch, tmp_path):
+    monkeypatch.setattr(random, "randint", fixed_random(6))
+    game = Game(2, 10)
+    game.reset(2, 10, is_mission=False)
+    game.high_score = 7
+    game.hard_drop()  # fills the 2-row board -> game over
+    assert game.state == "gameover"
+    assert (tmp_path / "score.txt").read_text() == "7"
+
+
+def test_no_score_file_is_written_while_still_playing(monkeypatch, tmp_path):
+    monkeypatch.setattr(random, "randint", fixed_random(6))
+    game = Game(20, 10)
+    game.reset(20, 10, is_mission=False)
+    game.hard_drop()
+    assert not (tmp_path / "score.txt").exists()

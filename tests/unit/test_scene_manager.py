@@ -6,6 +6,7 @@ so they're swapped for RecordingScene, which only logs its lifecycle calls.
 import pytest
 
 import elements.sceneManager as scene_manager_module
+from elements.eventManager import EventManager
 from elements.sceneManager import SceneManager
 from elements.scenes.scene import Scene
 
@@ -27,7 +28,8 @@ class RecordingScene(Scene):
 
 @pytest.fixture
 def manager(monkeypatch, screen):
-    for class_name in ("TestScene", "ErrorScene", "StartScene"):
+    for class_name in ("TestScene", "ErrorScene", "StartScene",
+                       "MissionTestScene", "EndlessTestScene"):
         monkeypatch.setattr(scene_manager_module, class_name, RecordingScene)
     return SceneManager("startScene", screen)
 
@@ -56,9 +58,35 @@ def test_invalid_change_scene_raises_and_stays_put(manager, from_scene, to_scene
     assert manager.CURRENT_SCENE is start
 
 
-def test_update_acts_on_a_change_scene_event(manager):
+def test_every_scene_is_registered_by_name(manager):
+    assert set(manager.SCENES) == {
+        "testScene", "errorScene", "startScene", "missionTestScene", "endlessTestScene",
+    }
+
+
+def test_change_scene_accepts_the_current_scene_by_name(manager):
+    manager.change_scene("startScene", "missionTestScene")
+    assert manager.CURRENT_SCENE is manager.SCENES["missionTestScene"]
+
+
+def test_change_scene_by_name_raises_if_that_is_not_the_current_scene(manager):
     start = manager.CURRENT_SCENE
-    start.EVENTS.append(("change_scene", start, "testScene"))
+    with pytest.raises(KeyError):
+        manager.change_scene("testScene", "endlessTestScene")
+    assert manager.CURRENT_SCENE is start
+
+
+def test_change_scene_rejects_anything_but_a_scene_or_name(manager):
+    with pytest.raises(KeyError):
+        manager.change_scene(42, "testScene")
+
+
+def test_event_manager_change_scene_reaches_the_scene_manager(manager):
+    EventManager.changeScene("startScene", "endlessTestScene")
+    assert manager.CURRENT_SCENE is manager.SCENES["endlessTestScene"]
+
+
+def test_update_only_updates_the_current_scene(manager):
     manager.update()
-    assert manager.CURRENT_SCENE is manager.SCENES["testScene"]
-    assert manager.CURRENT_SCENE.calls == ["enter", "update"]
+    assert manager.SCENES["startScene"].calls == ["enter", "update"]
+    assert manager.SCENES["testScene"].calls == []

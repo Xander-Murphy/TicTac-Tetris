@@ -5,6 +5,13 @@ from elements.UI.gameUI import GameUI
 from elements.config import Config
 from elements.gameLogic.board import Board
 
+WHITE = pygame.Color(255, 255, 255, 255)
+
+
+def is_blank(surface):
+    """True if every pixel is white (DataDisplay's cleared background)."""
+    return pygame.transform.average_color(surface)[:3] == WHITE[:3]
+
 
 def test_data_display_composes_child_surfaces_and_draws_at_position(screen):
     display = DataDisplay((20, 15), (30, 40))
@@ -43,11 +50,11 @@ def test_game_ui_initializes_score_and_next_piece_displays(screen):
     next_piece_size = board.height * ui.cell_size // 3
 
     assert ui.score_data_display.position == (0, 0)
-    assert ui.score_data_display.surface.get_bounding_rect().width > 0
+    assert not is_blank(ui.score_data_display.surface)  # score text was drawn
     assert ui.next_piece_data_display.size == (next_piece_size, next_piece_size)
     assert ui.next_piece_data_display.position == (
         board_position[0] + board.width * ui.cell_size + ui.cell_size,
         board_position[1],
     )
-    assert ui.next_piece_data_display.surface.get_bounding_rect().size == (0, 0)
+    assert is_blank(ui.next_piece_data_display.surface)  # nothing drawn there yet
     assert screen.get_at(ui.next_piece_data_display.position) == pygame.Color(0, 0, 255, 255)
