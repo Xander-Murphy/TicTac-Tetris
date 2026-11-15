@@ -21,16 +21,16 @@ class TestScene(Scene):
         if self.counter > 100000:
             self.counter = 0
 
-        if self.game.state == "start" and (self.counter % (self.PhysicsUpdate // 2) == 0 or self.ui.pressing_down):
+        if self.game.state == "start" and (self.counter % (self.FPS // 2) == 0 or self.ui.pressing_down):
             self.game.soft_drop()
 
         self.ui.handle_input(self.game, self.NAME)
 
         if self.game.state == "start":
-            self.ui.update_UI(self.game.board, self.game.current_piece, self.game.score, self.game.high_score)
+            self.ui.update_UI(self.game.board, self.game.current_piece, self.game.score, self.game.high_score, self.game.goal_row)
 
         if self.game.state == "gameover":
-            self.ui.draw_game_over_screen()
+            self.ui.draw_game_over_screen(self.game.is_mission)
 
     def exit(self):
         pass
