@@ -3,7 +3,7 @@
 import pygame
 import pytest
 
-from elements.UI.gameUI import UIMenu
+from elements.UI.gameUI import GameUI as UIMenu
 
 
 class RecordingGame:

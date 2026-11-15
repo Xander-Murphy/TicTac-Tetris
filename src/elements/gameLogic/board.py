@@ -35,6 +35,9 @@ class Board:
     def is_cell_occupied(self, cell : Cell):
         return cell.status is CellStatus.FILLED
 
+    def is_row_empty(self, row):
+        return not any(self.is_cell_occupied(cell) for cell in self.grid[row])
+
     def get_cell(self, row, col):
             cell : Cell = self.grid[row][col]
             return cell

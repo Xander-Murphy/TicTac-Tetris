@@ -20,7 +20,7 @@ import random
 
 from elements.gameLogic.board import Board
 from elements.gameLogic.piece import Piece, PIECE_SHAPES
-from elements.missionData.mission_data import MISSION_FIELD
+from elements.missionData.mission_data import MISSION_BOARDS, MISSION_GOAL_ROW
 
 
 class Game:
@@ -38,23 +38,33 @@ class Game:
         self.high_score = 0
         self.state = "gameover"
         self.is_mission = False
+        self.mission_board = 0
         self.board = None
         self.current_piece = None
 
-    def reset(self, height, width, is_mission=False):
+    def reset(self, height, width, is_mission=False, mission_board=0):
         """
         Starts a fresh round. Deliberately keeps high_score across
         resets, matching the original game's behavior (HighScore
         persisted across restarts, only Score reset to 0).
+
+        `mission_board` indexes MISSION_BOARDS and is only used when
+        `is_mission` is True. Out-of-range values wrap around.
         """
         self.height = height
         self.width = width
         self.is_mission = is_mission
-        initial_grid = MISSION_FIELD if is_mission else None
+        self.mission_board = mission_board % len(MISSION_BOARDS)
+        initial_grid = MISSION_BOARDS[self.mission_board] if is_mission else None
         self.board = Board(height, width, initial_grid)
         self.score = 0
         self.state = "start"
         self.spawn_piece()
+
+    @property
+    def goal_row(self):
+        """The row a mission must clear to finish, or None in endless mode."""
+        return MISSION_GOAL_ROW if self.is_mission else None
 
     def spawn_piece(self):
         piece_type = random.randint(0, len(PIECE_SHAPES) - 1)
@@ -105,9 +115,24 @@ class Game:
         self.board.lock_piece(self.current_piece)
         lines_cleared = self.board.clear_full_lines()
         self.score += lines_cleared ** 2
+
         if self.high_score < self.score:
             self.high_score = self.score
 
         self.spawn_piece()
         if self.board.intersects(self.current_piece):
+            self._save_high_score()
             self.state = "gameover"
+
+        if self.is_mission and self.board.is_row_empty(self.goal_row):
+            self._save_high_score()
+            self.state = "gameover"
+
+    def _save_high_score(self):
+        file = open("score.txt", "w")
+        file.write(str(self.high_score))
+        file.close()
+
+    def _load_high_score(self):
+        file = open("score.txt", "r")
+        file.close()

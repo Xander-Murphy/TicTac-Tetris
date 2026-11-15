@@ -15,7 +15,7 @@ class EndlessTestScene(Scene):
                 self.game = Game(20, 10)
                 self.ui = GameUI(self.SCREEN)
                 self.FPS = Config.FPS
-                self.game.reset(20, 10, False)
+                self.game.reset(20, 10, is_mission=False)
             
     def update(self):
         self.counter += 1
@@ -29,10 +29,10 @@ class EndlessTestScene(Scene):
         self.ui.handle_input(self.game, self.NAME)
 
         if self.game.state == "start":
-            self.ui.update_UI(self.game.board, self.game.current_piece, self.game.score, self.game.high_score)
+            self.ui.update_UI(self.game.board, self.game.current_piece, self.game.score, self.game.high_score, self.game.goal_row)
 
         if self.game.state == "gameover":
-            self.ui.draw_game_over_screen()
+            self.ui.draw_game_over_screen(self.game.is_mission)
 
     def exit(self):
         pass

@@ -27,3 +27,33 @@ MISSION_FIELD = [
     [1, 1, 2, 2, 3, 3, 5, 0, 0, 7],
     [1, 1, 2, 3, 3, 5, 5, 0, 0, 7],
 ]
+
+HARD_MISSION_FIELD = [
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [6, 6, 6, 6, 6, 0, 6, 6, 6, 6],
+    [6, 6, 6, 6, 6, 0, 6, 6, 6, 6],
+    [6, 6, 6, 6, 6, 0, 6, 6, 6, 6],
+    [6, 6, 6, 6, 6, 0, 6, 6, 6, 6],
+    [0, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+    [0, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+    [0, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+    [0, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+    [6, 6, 0, 6, 6, 6, 6, 6, 6, 6],
+    [6, 6, 0, 6, 6, 6, 6, 6, 6, 6],
+    [6, 6, 0, 6, 6, 6, 6, 6, 6, 6],
+    [6, 6, 0, 6, 6, 6, 6, 6, 6, 6],
+    [6, 6, 6, 6, 6, 6, 6, 6, 6, 0],
+    [6, 6, 6, 6, 6, 6, 6, 6, 6, 0],
+    [6, 6, 6, 6, 6, 6, 6, 6, 6, 0],
+    [6, 6, 6, 6, 6, 6, 6, 6, 6, 0],
+]
+
+# Every selectable mission layout, in the order the player cycles through
+# them. Add a new layout above and append it here - no logic changes needed.
+MISSION_BOARDS = (MISSION_FIELD, HARD_MISSION_FIELD)
+
+# Mission goal: the game ends once this row has been fully cleared out.
+MISSION_GOAL_ROW = 17

@@ -14,12 +14,14 @@ from ..gameLogic.game import Game
 from ..gameLogic.cell import Cell
 from ..gameLogic.board import Board
 from ..config import Config
+from ..missionData.mission_data import MISSION_BOARDS
 from .textures import Texture
 from .dataDisplay import DataDisplay
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 GRAY = (128, 128, 128)
+RED = (255, 0, 0)
 
 class GameUI:
     def __init__(self, screen, cell_size = 30,score_data_size=(100,50)):
@@ -31,12 +33,13 @@ class GameUI:
         self.is_board_initialized = False
         self.score_data_size = score_data_size
         self.is_data_displays_initialized = False
+        self.mission_selected = 0  # which mission layout R restarts with
 
     # -- Drawing -----------------------------------------------------
 
-    def update_UI(self, board : Board, piece, score, high_score):
+    def update_UI(self, board : Board, piece, score, high_score, goal_row=None):
         self.UI_surface.fill(WHITE)
-        self.draw_board(board)
+        self.draw_board(board, goal_row)
         self.draw_piece(piece, board)
         self.draw_hud(score, high_score)
     
@@ -85,7 +88,7 @@ class GameUI:
         
         return cells
 
-    def draw_board(self, board : Board):
+    def draw_board(self, board : Board, goal_row=None):
         if not self.is_board_initialized:
             self.initialize_board(board)
 
@@ -134,6 +137,15 @@ class GameUI:
                 # Put the cell surface on the board surface
                 board_surface.blit(cell_surface, (col_index*cell_size, row_index*cell_size))
 
+        # Outline the mission goal row in red
+        if goal_row is not None:
+            pygame.draw.rect(
+                board_surface,
+                RED,
+                [0, goal_row * cell_size, board_size[0], cell_size],
+                2,
+            )
+
         self.screen.blit(board_surface, self.board_position)
         
     def draw_piece(self, piece, board: Board):
@@ -168,13 +180,17 @@ class GameUI:
         self.score_data_display.display(self.screen)
         self.next_piece_data_display.display(self.screen)
 
-    def draw_game_over_screen(self):
-        print("game over")
+    def draw_game_over_screen(self, is_mission=False):
         lines = [
             "Press Q to quit",
             "Press R to restart",
             "Press M to go back to main menu",
         ]
+        if is_mission:
+            lines.append(f"Left/Right: mission board {self.mission_selected + 1}/{len(MISSION_BOARDS)}")
+
+        # Clear behind the text so a changed line doesn't draw over the old one
+        pygame.draw.rect(self.screen, BLACK, [15, 255, 460, len(lines) * 35 + 10])
         for offset, line in enumerate(lines):
             text = self.font.render(line, True, (255, 215, 0))
             self.screen.blit(text, [25, 265 + offset * 35])
@@ -220,9 +236,11 @@ class GameUI:
         if event.key == pygame.K_q:
             return True
         elif event.key == pygame.K_r:
-            is_mission = game.is_mission
-            game.reset(20, 10, is_mission)
+            game.reset(20, 10, is_mission=game.is_mission, mission_board=self.mission_selected)
             self.pressing_down = False
+        elif event.key in (pygame.K_LEFT, pygame.K_RIGHT) and game.is_mission:
+            step = 1 if event.key == pygame.K_RIGHT else -1
+            self.mission_selected = (self.mission_selected + step) % len(MISSION_BOARDS)
         elif event.key == pygame.K_m:
             EventManager.changeScene(scene, "startScene")
             self.pressing_down = False
