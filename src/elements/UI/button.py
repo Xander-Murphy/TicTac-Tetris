@@ -1,17 +1,30 @@
 import pygame
+from ..eventManager import EventManager
+
 
 # refactoring todo
 # 1. 
 
 
 class Button:
-    def __init__(self, x, y, width, height, screen : pygame.surface, color = "black"):
+    def __init__(
+            self, 
+            x, 
+            y, 
+            width, 
+            height, 
+            screen : pygame.surface, 
+            color = "black",
+            is_hovering_callback = None,
+            is_clicked_callback = None):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
         self.color = pygame.Color(color)
         self.screen = screen
+        self.is_hovering_callback = is_hovering_callback
+        self.is_clicked_callback = is_clicked_callback
         self.collisionBox : pygame.Rect = pygame.Rect(x, y, width, height)
 
     def display(self):
@@ -23,10 +36,14 @@ class Button:
         collisionBox = self.collisionBox
         
         if collisionBox.x <= mouseX <= collisionBox.x + collisionBox.width and collisionBox.y <= mouseY <= collisionBox.y + collisionBox.height:
+            if self.is_hovering_callback is not None:
+                self.is_hovering_callback()
             return True
 
     def is_clicked(self):
         if self.is_hovering() and pygame.mouse.get_pressed()[0]:
+            if self.is_clicked_callback is not None:
+                self.is_clicked_callback()
             return True
         return False
 
@@ -46,6 +63,8 @@ class ImageButton(Button):
         self.coords = (x, y)
         self.screen = screen
         self.scale = scale
+        self.is_hovering_callback = None
+        self.is_clicked_callback = None
 
         # get dimentions of image and scale it 
         # This assumes the image is properly cropped // the resolution matches the image

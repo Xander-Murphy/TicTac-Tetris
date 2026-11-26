@@ -16,7 +16,7 @@ from elements.scenes.startScene import StartScene
 from elements.scenes.testScene import TestScene as GameScene
 
 GAME_SCENES = [GameScene, MissionTestScene, EndlessTestScene]
-BUTTONS = ("Start Button", "Quit Button", "Mission Button", "Endless Button")
+BUTTONS = ("Start Button", "Quit Button", "Mission Button", "Challenge Button")
 
 
 # ---------------------------------------------------------------------
@@ -36,7 +36,7 @@ def start_scene_with(screen, clicked=None):
 @pytest.mark.parametrize("clicked, next_scene", [
     ("Start Button", "testScene"),
     ("Mission Button", "missionTestScene"),
-    ("Endless Button", "endlessTestScene"),
+    ("Challenge Button", "endlessTestScene"),
 ])
 def test_start_scene_buttons_change_scene(screen, scene_changes, quit_calls, clicked, next_scene):
     scene = start_scene_with(screen, clicked)
