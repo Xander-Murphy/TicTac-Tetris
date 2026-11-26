@@ -41,6 +41,10 @@ class Game:
         self.mission_board = 0
         self.board = None
         self.current_piece = None
+        
+        # Start next piece
+        piece_type = random.randint(0, len(PIECE_SHAPES) - 1)
+        self.next_piece = Piece(piece_type, x=3, y=0)
 
     def reset(self, height, width, is_mission=False, mission_board=0):
         """
@@ -67,8 +71,9 @@ class Game:
         return MISSION_GOAL_ROW if self.is_mission else None
 
     def spawn_piece(self):
+        self.current_piece = self.next_piece
         piece_type = random.randint(0, len(PIECE_SHAPES) - 1)
-        self.current_piece = Piece(piece_type, x=3, y=0)
+        self.next_piece = Piece(piece_type, x=3, y=0)
 
     def move_left(self):
         self._try_move(-1, 0)

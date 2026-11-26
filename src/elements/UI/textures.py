@@ -4,7 +4,7 @@ class Texture:
     @classmethod
     def getTileTexture(cls, value : int):
         Colors = (
-            (128, 128, 128),  # Default color
+            (0, 0, 0),  # Default color
             (241, 239, 47),   # Yellow
             (136, 44, 237),   # Purple
             (138, 234, 40),   # Green

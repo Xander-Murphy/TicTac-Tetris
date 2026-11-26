@@ -24,6 +24,7 @@ class DataDisplay:
 
     def display(self, target: pygame.Surface) -> pygame.Rect:
         rect = target.blit(self.surface, self.position)
+        # Blue border for testing 
         pygame.draw.rect(target, BLUE, rect, 1)
         return rect
 

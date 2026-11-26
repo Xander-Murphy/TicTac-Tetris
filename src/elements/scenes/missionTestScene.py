@@ -13,7 +13,7 @@ class MissionTestScene(Scene):
     def enter(self):
             self.counter : int = 0
             self.game = Game(20, 10)
-            self.ui = GameUI(self.SCREEN)
+            self.ui = GameUI(self.SCREEN, self.game)
             self.FPS = Config.FPS
             self.game.reset(20, 10, is_mission=True)
         

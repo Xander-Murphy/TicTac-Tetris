@@ -24,24 +24,26 @@ GRAY = (128, 128, 128)
 RED = (255, 0, 0)
 
 class GameUI:
-    def __init__(self, screen, cell_size = 30,score_data_size=(100,50)):
+    def __init__(self, screen, game : Game, background=None, cell_size = 30, score_data_size=(150,50)):
         self.screen : pygame.Surface = screen
         self.font = pygame.font.SysFont("Calibri", 25, True, False)
         self.pressing_down = False  # tracked here since it's input state, not game state
-        self.UI_surface = pygame.Surface(Config.SCREEN_SIZE)
+        self.UI_surface = pygame.Surface(Config.SCREEN_SIZE, pygame.SRCALPHA)
         self.cell_size = cell_size
         self.is_board_initialized = False
-        self.score_data_size = score_data_size
+        self.score_data_size = (150,50) 
         self.is_data_displays_initialized = False
         self.mission_selected = 0  # which mission layout R restarts with
+        self.game = game
 
     # -- Drawing -----------------------------------------------------
 
-    def update_UI(self, board : Board, piece, score, high_score, goal_row=None):
-        self.UI_surface.fill(WHITE)
+    def update_UI(self, board : Board, piece, score, high_score, goal_row=None): # Game is ongoing
+        self.UI_surface.fill(GRAY)
         self.draw_board(board, goal_row)
         self.draw_piece(piece, board)
         self.draw_hud(score, high_score)
+        self.screen.blit(self.UI_surface, (0,0))
     
     def initialize_board(self, board : Board):
         self.board_size = (
@@ -58,10 +60,10 @@ class GameUI:
 
     def initialize_data_displays(self):
         score_size = (
-            max(self.score_data_size[0], self.screen.get_width()),
+            self.score_data_size[0],
             self.score_data_size[1],
         )
-        self.score_data_display = DataDisplay(score_size, (0, 0))
+        self.score_data_display = DataDisplay(score_size, (50, self.board_position[1]))
 
         next_piece_size = self.board_size[1] // 3
         self.next_piece_data_display = DataDisplay(
@@ -73,14 +75,14 @@ class GameUI:
         )
         self.is_data_displays_initialized = True
     
-    def create_board_cell_surfaces(self, board : Board, cell_size : int):
+    def create_cell_surfaces(self, width, height, cell_size : int):
         cell_dimentions = (cell_size, cell_size)
         cells = []
 
-        for row in range(board.height):
+        for row in range(height):
             cell_row = []
             
-            for col in range(board.width):
+            for col in range(width):
                 board_cell = pygame.Surface(cell_dimentions)
                 cell_row.append(board_cell)
             
@@ -89,40 +91,20 @@ class GameUI:
         return cells
 
     def draw_board(self, board : Board, goal_row=None):
+        line_color = GRAY
+        
         if not self.is_board_initialized:
             self.initialize_board(board)
 
         board_surface = self.board_surface
         board_size = board_surface.get_size()
         cell_size = self.cell_size
-        cell_surfaces = self.create_board_cell_surfaces(board, cell_size)
+        cell_surfaces = self.create_cell_surfaces(board.width, board.height, cell_size)
 
         # Background of board
         board_surface.fill(WHITE)
         
-        # Draw lines
-        # Draw vertical lines
-        for col in range(1, board.width):
-            line_x = col * cell_size
-            pygame.draw.line(
-                board_surface,
-                BLACK,
-                (line_x, 0),
-                (line_x, board_size[1]),
-                1
-            )
-
-        # Draw horizontal lines
-        for row in range(1, board.height):
-            line_y = row * cell_size
-            pygame.draw.line(
-                board_surface,
-                BLACK,
-                (0, line_y),
-                (board_size[0], line_y),
-                1
-            )
-
+        
         # Draw Cells
         for row_index, row in enumerate(cell_surfaces):
             for col_index, cell_surface in enumerate(row):
@@ -137,6 +119,29 @@ class GameUI:
                 # Put the cell surface on the board surface
                 board_surface.blit(cell_surface, (col_index*cell_size, row_index*cell_size))
 
+        # Draw lines
+        # Draw vertical lines
+        for col in range(1, board.width):
+            line_x = col * cell_size
+            pygame.draw.line(
+                board_surface,
+                line_color,
+                (line_x, 0),
+                (line_x, board_size[1]),
+                1
+            )
+
+        # Draw horizontal lines
+        for row in range(1, board.height):
+            line_y = row * cell_size
+            pygame.draw.line(
+                board_surface,
+                line_color,
+                (0, line_y),
+                (board_size[0], line_y),
+                1
+            )
+        
         # Outline the mission goal row in red
         if goal_row is not None:
             pygame.draw.rect(
@@ -146,7 +151,7 @@ class GameUI:
                 2,
             )
 
-        self.screen.blit(board_surface, self.board_position)
+        self.UI_surface.blit(board_surface, self.board_position)
         
     def draw_piece(self, piece, board: Board):
         cell_size = self.cell_size
@@ -166,21 +171,54 @@ class GameUI:
                         ],
                     )
 
-        self.screen.blit(self.board_surface, self.board_position)
+        self.UI_surface.blit(self.board_surface, self.board_position)
 
     def draw_hud(self, score, high_score):
         if not self.is_data_displays_initialized:
             raise RuntimeError("The board must be initialized before drawing the HUD")
 
+        # Score display
         self.score_data_display.clear()
         text = self.font.render(f"Score: {score}", True, BLACK)
         self.score_data_display.add_surface(text, (0, 0))
         text_hi = self.font.render(f"High Score: {high_score}", True, BLACK)
         self.score_data_display.add_surface(text_hi, (0, 24))
-        self.score_data_display.display(self.screen)
-        self.next_piece_data_display.display(self.screen)
+        self.score_data_display.display(self.UI_surface)
+        
+        # Next piece display
+        next_piece = self.game.next_piece
+        next_piece_display = self.next_piece_data_display
+        next_piece_size = (
+            next_piece_display.size[0] // 1.5,
+            next_piece_display.size[1] // 1.5,
+        )
+        next_piece_grid = pygame.Surface(next_piece_size)
+        next_piece_grid.fill(WHITE)
+        grid_cell_size = next_piece_grid.get_width() // 4
+        cell_surfaces = self.create_cell_surfaces(4, 4, grid_cell_size)
 
-    def draw_game_over_screen(self, is_mission=False):
+        for cell_index in next_piece.image():
+            row, col = divmod(cell_index, 4)
+            cell_surface = cell_surfaces[row][col]
+            Texture.setCellTexture(cell_surface, next_piece.color)
+            next_piece_grid.blit(
+                cell_surface,
+                (col * grid_cell_size, row * grid_cell_size),
+            )
+
+        next_piece_display.clear()
+        text = self.font.render("NEXT PIECE", True, BLACK)
+        next_piece_display.add_surface(text, (next_piece_display.size[0]//4, 10))
+        next_piece_display.add_surface(
+            next_piece_grid,
+            (
+                (next_piece_display.size[0] - next_piece_size[0]) // 2,
+                (next_piece_display.size[1] - next_piece_size[1]) // 2,
+            ),
+        )
+        next_piece_display.display(self.UI_surface)
+
+    def draw_game_over_screen(self, is_mission=False): # Game is over
         lines = [
             "Press Q to quit",
             "Press R to restart",
@@ -190,10 +228,11 @@ class GameUI:
             lines.append(f"Left/Right: mission board {self.mission_selected + 1}/{len(MISSION_BOARDS)}")
 
         # Clear behind the text so a changed line doesn't draw over the old one
-        pygame.draw.rect(self.screen, BLACK, [15, 255, 460, len(lines) * 35 + 10])
+        pygame.draw.rect(self.UI_surface, BLACK, [Config.SCREEN_SIZE[0]//4 - 15, 255, 460, len(lines) * 35 + 10])
         for offset, line in enumerate(lines):
             text = self.font.render(line, True, (255, 215, 0))
-            self.screen.blit(text, [25, 265 + offset * 35])
+            self.UI_surface.blit(text, [Config.SCREEN_SIZE[0]//4, 265 + offset * 35])
+        self.screen.blit(self.UI_surface, (0, 0))
 
     # -- Input ---------------------------------------------------------
 

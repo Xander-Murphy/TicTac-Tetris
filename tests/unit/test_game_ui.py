@@ -182,3 +182,34 @@ def test_game_over_screen_draws_without_errors_in_both_modes(screen):
     ui = GameUI(screen)
     ui.draw_game_over_screen()
     ui.draw_game_over_screen(is_mission=True)
+
+
+def test_game_over_screen_blits_its_surface_to_the_screen(screen):
+    screen.fill((10, 20, 30))
+    ui = GameUI(screen, RecordingGame("gameover"))
+
+    ui.draw_game_over_screen()
+
+    assert screen.get_at((16, 256))[:3] == (0, 0, 0)
+
+
+def test_draw_hud_renders_the_next_piece_in_its_display_grid(screen):
+    game = RecordingGame("start")
+    game.next_piece = Piece(0, 3, 0)
+    ui = GameUI(screen, game)
+    ui.initialize_board(Board(20, 10))
+
+    ui.draw_hud(score=0, high_score=0)
+
+    display = ui.next_piece_data_display
+    grid_offset = (
+        (display.size[0] - display.size[0] // 2) // 2,
+        (display.size[1] - display.size[1] // 2) // 2,
+    )
+    cell_size = (display.size[0] // 2) // 4
+    first_occupied_cell = (
+        display.position[0] + grid_offset[0] + cell_size + cell_size // 2,
+        display.position[1] + grid_offset[1] + cell_size // 2,
+    )
+
+    assert screen.get_at(first_occupied_cell)[:3] == Texture.getTileTexture(game.next_piece.color)
